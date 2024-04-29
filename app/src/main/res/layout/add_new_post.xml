@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <CheckBox
+            android:id="@+id/checkBoxIsRecipe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="This is a cooking recipe " />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="Please select a category"/>
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <!-- Tiêu đề -->
+    <EditText
+        android:id="@+id/editTextTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Name your culinary creation!"
+        android:textSize="18sp"
+        android:padding="10dp"
+        android:layout_marginHorizontal="10dp"/>
+
+    <!-- Trường nhập nội dung -->
+    <EditText
+        android:id="@+id/editTextContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Share your cooking steps!"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:gravity="top"
+        android:layout_weight="1"
+        android:minLines="5"/>
+    <!-- Button để chọn ảnh từ bộ nhớ -->
+    <Button
+        android:id="@+id/buttonChooseImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="add image"
+        android:layout_margin="10dp"
+        android:padding="10dp"/>
+
+    <!-- Recyclerview để hiển thị ảnh đã chọn -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/imageViewSelected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:visibility="gone"/>
+
+    <!-- Nút gửi bài viết -->
+    <Button
+        android:id="@+id/buttonSubmit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:layout_margin="10dp"
+        android:padding="10dp"/>
+
+</LinearLayout>

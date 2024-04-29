@@ -1,0 +1,211 @@
+<!-- activity_post_detail.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/netscrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        android:layout_above="@+id/bottomaddcomment">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="7dp"
+                android:padding="10dp">
+                <!-- Ảnh đại diện -->
+                <ImageView
+                    android:id="@+id/imageViewAvatar"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:scaleType="centerCrop"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp">
+                    <!-- Phần tên người đăng -->
+                    <TextView
+                        android:id="@+id/textViewUsername"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="6dp"
+                        android:text="Username"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <!-- Ngày tháng đăng bài -->
+                    <TextView
+                        android:id="@+id/txtRecipe"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="70dp"
+                        android:layout_marginTop="2dp"
+                        android:text="Recipe"
+                        android:visibility="gone"></TextView>
+
+                    <TextView
+                        android:id="@+id/textViewDateTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/textViewUsername"
+                        android:text="YYYY/MM/DD  00:00"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginStart="15dp"
+                        android:src="@drawable/menu" />
+                </RelativeLayout>
+            </LinearLayout>
+            <!-- Tiêu đề của bài viết -->
+            <TextView
+                android:id="@+id/textViewTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="10dp"/>
+
+            <!-- Nội dung của bài viết -->
+            <TextView
+                android:id="@+id/textViewContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:lineSpacingMultiplier="1.2"
+                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="10dp"/>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewImages"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            </FrameLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="15dp"
+                android:layout_marginTop="2dp">
+                <TextView
+                    android:id="@+id/likeCountTextView"
+                    android:layout_width="wrap_content"
+                    android:text="0"
+                    android:layout_alignParentLeft="true"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/likeCountTextView"
+                    android:text=" likes"/>
+                <TextView
+                    android:id="@+id/commentCountTextView"
+                    android:layout_toLeftOf="@+id/textcmt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"/>
+                <TextView
+                    android:id="@+id/textcmt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text=" comments"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:weightSum="3">
+                <ImageButton
+                    android:id="@+id/buttonLike"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/like"/>
+                <ImageButton
+                    android:id="@+id/buttonComment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/comment" />
+                <ImageButton
+                    android:id="@+id/buttonShare"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/share"/>
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#20808080"/>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewComments"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            </FrameLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+    <RelativeLayout
+        android:id="@+id/bottomaddcomment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="5dp">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentTop="true"
+            android:background="#20808080"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:layout_marginHorizontal="10dp">
+            <EditText
+                android:id="@+id/writeComment"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:paddingHorizontal="15dp"
+                android:paddingVertical="5dp"
+                android:layout_toLeftOf="@+id/sendComment"
+                android:hint="write a comment"
+                android:background="@drawable/custom_border2"/>
+            <ImageView
+                android:id="@+id/sendComment"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_send"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+</RelativeLayout>

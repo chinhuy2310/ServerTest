@@ -1,0 +1,11 @@
+<!-- res/drawable/background_selector.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- State when item is pressed -->
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFC107"/>
+            <corners android:topLeftRadius="10dp"
+                android:topRightRadius="10dp"/> <!-- Color when pressed -->
+        </shape>
+    </item>
+</selector>

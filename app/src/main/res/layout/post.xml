@@ -1,0 +1,155 @@
+<!-- layout_post.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/custom_border"
+    android:orientation="vertical"
+    android:layout_margin="5dp"
+    android:padding="5dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <!-- Ảnh đại diện -->
+        <ImageView
+            android:id="@+id/imageViewAvatar"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp">
+            <!-- Phần tên người đăng -->
+            <TextView
+                android:id="@+id/textViewUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="6dp"
+                android:text="Username"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Ngày tháng đăng bài -->
+            <TextView
+                android:id="@+id/txtRecipe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="70dp"
+                android:layout_marginTop="2dp"
+                android:text="Recipe"
+                android:visibility="gone"></TextView>
+
+            <TextView
+                android:id="@+id/textViewDateTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textViewUsername"
+                android:text="YYYY/MM/DD  00:00"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12sp" />
+
+            <ImageView
+                android:id="@+id/postoptions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:src="@drawable/menu" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <!-- Nội dung bài đăng -->
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="16sp"
+        android:layout_marginVertical="5dp"
+        android:layout_marginHorizontal="2dp"
+        android:maxLines="2"
+        android:ellipsize="end"/>
+
+    <!-- Ảnh trong bài đăng -->
+    <ImageView
+        android:id="@+id/imageViewPost"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        android:layout_margin="2dp"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginTop="2dp">
+        <TextView
+            android:id="@+id/likeCountTextView"
+            android:layout_width="wrap_content"
+            android:text="0"
+            android:layout_alignParentLeft="true"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/likeCountTextView"
+            android:text=" likes"/>
+        <TextView
+            android:id="@+id/commentCountTextView"
+            android:layout_toLeftOf="@+id/textcmt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"/>
+        <TextView
+            android:id="@+id/textcmt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text=" comments"/>
+
+    </RelativeLayout>
+    <!-- Giao diện cho nút Like, Comment, Share -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="30dp"
+        android:background="#808080"
+        android:layout_marginTop="5dp"></LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:weightSum="3">
+
+        <!-- Nút Like -->
+        <ImageButton
+            android:id="@+id/buttonLike"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/like"
+            />
+
+        <!-- Nút Comment -->
+        <ImageButton
+            android:id="@+id/buttonComment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/comment" />
+
+        <!-- Nút Share -->
+        <ImageButton
+            android:id="@+id/buttonShare"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/share"/>
+    </LinearLayout>
+</LinearLayout>
