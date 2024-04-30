@@ -9,25 +9,25 @@ public class Post implements Serializable {
     private String avatarUrl;
     private String username;
     private String date;
-    private String title;
+    private String post_title;
     private String content;
-    private List<String> imageUrls;
+    private String imageUrls;
     private int isRecipe;
     private List<Comment> comments;
-    private boolean isLiked;
+    private int isLiked;
 
-    public Post(int userid,int postId,String avatarUrl, String username, String date, String title, String content, List<String> imageUrls, int isRecipe,List<Comment> comments) {
+    public Post(int userid,int postId,String avatarUrl, String username, String date, String post_title, String content, String imageUrls, int isRecipe,List<Comment> comments) {
         this.userid = userid;
         this.avatarUrl = avatarUrl;
         this.username = username;
         this.date = date;
-        this.title = title;
+        this.post_title = post_title;
         this.content = content;
         this.imageUrls = imageUrls;
         this.isRecipe = isRecipe;
         this.comments = comments;
         this.postId = postId;
-        this.isLiked = false;
+        this.isLiked = 0;
     }
 
     public int getPostId() {return postId;}
@@ -61,7 +61,7 @@ public class Post implements Serializable {
 
 
     public String getTitle() {
-        return title;
+        return post_title;
     }
 
     public String getContent() {
@@ -72,11 +72,11 @@ public class Post implements Serializable {
         this.content = content;
     }
 
-    public List<String> getImageUrls() {
+    public String getImageUrls() {
         return imageUrls;
     }
 
-    public void setImageUrls(List<String> imageUrls) {
+    public void setImageUrls(String imageUrls) {
         this.imageUrls = imageUrls;
     }
 
@@ -93,11 +93,11 @@ public class Post implements Serializable {
         this.comments = comments;
     }
 
-    public boolean isLiked() {
+    public int isLiked() {
         return isLiked;
     }
 
-    public void setLiked(boolean liked) {
-        isLiked = liked;
-    }
+    public void setLiked(int liked) {isLiked = liked;}
+
+
 }

@@ -2,6 +2,7 @@ package com.example.servertest.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,10 +55,21 @@ public class adapterPostMenu1 extends RecyclerView.Adapter<adapterPostMenu1.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         Post post = postList.get(position);
+        Log.e("ImageURL", "URL: " + post.getImageUrls());
 
-        if (!post.getImageUrls().isEmpty()) {
-            String imageUrl = post.getImageUrls().get(0); // Lấy URL ảnh đầu tiên trong danh sách
-            Picasso.get().load(imageUrl).into(holder.imageView);
+        String firstImageUrl = null;
+        if (post.getImageUrls() instanceof String) {
+            // Nếu là một chuỗi, xử lý chuỗi để lấy URL ảnh
+            String imageUrlsString = (String) post.getImageUrls();
+            // Ví dụ: phân tách chuỗi để lấy các URL ảnh
+            String[] imageUrlArray = imageUrlsString.split(",");
+            if (imageUrlArray.length > 0) {
+                firstImageUrl = imageUrlArray[0];
+            }
+        }
+
+        if (firstImageUrl != null && !firstImageUrl.isEmpty()) {
+            Picasso.get().load(firstImageUrl).into(holder.imageView);
         } else {
             holder.imageView.setImageResource(R.drawable.food_bg);
         }
