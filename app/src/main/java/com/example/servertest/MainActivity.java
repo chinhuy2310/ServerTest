@@ -1,12 +1,16 @@
 package com.example.servertest;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
+
+
+import androidx.viewpager2.widget.ViewPager2;
+
 
 import com.example.servertest.adapter.ViewPagerAdapter;
 import com.example.servertest.model.User;

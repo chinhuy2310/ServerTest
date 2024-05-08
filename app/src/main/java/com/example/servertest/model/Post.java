@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Post implements Serializable {
-    private int userid;
-    private int postId;
-    private String avatarUrl;
+    private int user_id;
+    private int post_id;
+    private String avatar_image;
     private String username;
     private String date;
     private String post_title;
@@ -16,9 +16,9 @@ public class Post implements Serializable {
     private List<Comment> comments;
     private int isLiked;
 
-    public Post(int userid,int postId,String avatarUrl, String username, String date, String post_title, String content, String imageUrls, int isRecipe,List<Comment> comments) {
-        this.userid = userid;
-        this.avatarUrl = avatarUrl;
+    public Post(int user_id,int post_id,String avatar_image, String username, String date, String post_title, String content, String imageUrls, int isRecipe,List<Comment> comments) {
+        this.user_id = user_id;
+        this.avatar_image = avatar_image;
         this.username = username;
         this.date = date;
         this.post_title = post_title;
@@ -26,23 +26,22 @@ public class Post implements Serializable {
         this.imageUrls = imageUrls;
         this.isRecipe = isRecipe;
         this.comments = comments;
-        this.postId = postId;
-        this.isLiked = 0;
+        this.post_id = post_id;
+        this.isLiked = isLiked;
     }
 
-    public int getPostId() {return postId;}
-    public void setPostId(int postId) {this.postId =postId;}
+    public int getPostId() {return post_id;}
 
     public int getId() {
-        return userid;
+        return user_id;
     }
 
-    public void setId(int userid) {
-        this.userid = userid;
+    public void setId(int user_id) {
+        this.user_id = user_id;
     }
 
     public String getAvatarUrl() {
-        return avatarUrl;
+        return avatar_image;
     }
 
 
@@ -51,9 +50,7 @@ public class Post implements Serializable {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+
 
     public String getDate() {
         return date;
@@ -76,9 +73,6 @@ public class Post implements Serializable {
         return imageUrls;
     }
 
-    public void setImageUrls(String imageUrls) {
-        this.imageUrls = imageUrls;
-    }
 
     public int getIsRecipe() {
         return isRecipe;
@@ -89,15 +83,12 @@ public class Post implements Serializable {
         return comments;
     }
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
-    }
 
     public int isLiked() {
         return isLiked;
     }
 
-    public void setLiked(int liked) {isLiked = liked;}
+    public void setLiked(int liked) {isLiked = isLiked;}
 
 
 }
