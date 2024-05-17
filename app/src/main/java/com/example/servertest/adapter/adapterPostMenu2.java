@@ -40,6 +40,7 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
     public interface OnPostClickListener {
         void onPostClick(int position);
         void onCommentClick(int position);
+        void likePost(int userId, int postId);
 
     }
 
@@ -65,25 +66,38 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
         holder.textViewUsername.setText(post.getUsername());
         holder.textViewDateTime.setText(post.getDate());
         holder.textViewTitle.setText(post.getTitle());
+        holder.buttonLike.setTag(post.getPostId());
+        int isLiked = post.getIsLiked();
+        holder.buttonLike.setImageResource(isLiked == 1 ? R.drawable.ic_liked : R.drawable.like);
+        holder.buttonLike.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onPostClickListener != null) {
+                    int userId = user.getUserId();
+                    int postId =post.getPostId();
+                    onPostClickListener.likePost(userId, postId);
+                    notifyDataSetChanged();
+                }
+            }
+        });
 
-//        boolean isLiked = databaseHelper.isPostLikedByUser(post.getPostId(), user.getUserId());
-//        holder.buttonLike.setImageResource(isLiked ? R.drawable.ic_liked : R.drawable.like);
+
+
 
         holder.txtRecipe.setVisibility(post.getIsRecipe() == 1 ? View.VISIBLE : View.GONE);
-//        int likeCount = databaseHelper.getLikeCountForPost(post.getPostId());
-//        int commentCount = databaseHelper.getCommentCountForPost(post.getPostId());
-//        holder.likeCountTextView.setText(String.valueOf(likeCount));
-//        holder.commentCountTextView.setText(String.valueOf(commentCount));
 
-//        Picasso.get().load(post.getAvatarUrl()).into(holder.imageViewAvatar);
+        int likeCount = post.getLikeCount();
+        int commentCount = post.getCommentCount();
+        holder.likeCountTextView.setText(String.valueOf(likeCount));
+        holder.commentCountTextView.setText(String.valueOf(commentCount));
+
         if (!post.getAvatarUrl().isEmpty()) {
             Picasso.get().load(post.getAvatarUrl()).into(holder.imageViewAvatar);
         } else {
 //             Nếu avatarUrl là null, hiển thị ảnh từ resource drawable
             Picasso.get().load(R.drawable.user_icon2).into(holder.imageViewAvatar);
         }
-        //-------------------------------------------------------------
-        // hiển thị ảnh đầu tiên trong danh sách ảnh của bài viết
+
         String firstImageUrl = null;
         if (post.getImageUrls() instanceof String) {
             // Nếu là một chuỗi, xử lý chuỗi để lấy URL ảnh
@@ -100,8 +114,6 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
         } else {
             holder.imageViewPost.setVisibility(View.GONE);
         }
-        //-----------------------------------------------------
-
         int currentPosition = position;
 
         // Gán sự kiện onClickListener cho itemView
@@ -120,104 +132,6 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
                 onPostClickListener.onCommentClick(position);
             }
         });
-
-
-
-        //---------------------------------------------------------------------------------
-        //hiển thị số lượng ike và comment
-//        apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
-
-//        apiService.getCommentCountForPost(post.getPostId()).enqueue(new Callback<Integer>() {
-//            @Override
-//            public void onResponse(Call<Integer> call, Response<Integer> response) {
-//                int commentCount = response.body();
-//                holder.commentCountTextView.setText(String.valueOf(commentCount));
-//            }
-//            @Override
-//            public void onFailure(Call<Integer> call, Throwable t) {
-//                // Handle error
-//            }
-//        });
-//        apiService.getLikeCountForPost(post.getPostId()).enqueue(new Callback<Integer>() {
-//            @Override
-//            public void onResponse(Call<Integer> call, Response<Integer> response) {
-//                int likeCount = response.body();
-//                holder.likeCountTextView.setText(String.valueOf(likeCount));
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Integer> call, Throwable t) {
-//                // Handle error
-//            }
-//        });
-        //------------------------------------------------------------------------------------
-
-
-//        holder.buttonLike.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                boolean isLiked = post.isLiked();
-//                int likeCount = databaseHelper.getLikeCountForPost(post.getPostId());
-//                if (isLiked) {
-//                    databaseHelper.toggleLike(user.getUserId(), post.getPostId(), false);
-//                   likeCount--;
-//                }else{
-//                    databaseHelper.toggleLike(user.getUserId(), post.getPostId(), true);
-//                    likeCount++;
-//                }
-//                post.setLiked(!isLiked);
-//                holder.buttonLike.setImageResource(!isLiked ? R.drawable.ic_liked : R.drawable.like);
-//                holder.likeCountTextView.setText(String.valueOf(likeCount));
-//            }
-//        });
-
-
-//        holder.postOptions.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                // Tạo PopupMenu
-//                PopupMenu popupMenu = new PopupMenu(context, holder.postOptions);
-//                popupMenu.inflate(R.menu.post_options_menu); // Sử dụng menu resource đã tạo
-//
-//                // Xử lý sự kiện khi một item trong PopupMenu được chọn
-//                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-//                    @Override
-//                    public boolean onMenuItemClick(MenuItem item) {
-//                        switch (item.getItemId()) {
-//                            case R.id.menu_report:
-//                                // Xử lý khi chọn Report
-//                                // Ví dụ: Hiển thị thông báo "Reported"
-//                                Toast.makeText(context, "Reported", Toast.LENGTH_SHORT).show();
-//                                return true;
-//                            case R.id.menu_delete:
-//
-////                                posts.remove(position);
-////                                notifyItemRemoved(position);
-//                                if(post.getId()== user.getUserId()){
-//                                    Log.e("post userid", String.valueOf(post.getId()));
-//                                    Log.e(" userid", String.valueOf(user.getUserId()));
-//
-//                                    databaseHelper.deletePost(post.getPostId());
-//                                    Toast.makeText(context, "Delete", Toast.LENGTH_SHORT).show();
-//                                    retrievePostsFromDatabase();
-//                                }else if(user.getIsAdmin()==1){  //If you're an admin, you can delete any post
-//                                    databaseHelper.deletePost(post.getPostId());
-//                                    retrievePostsFromDatabase();
-//                                }
-//                                else{
-//                                    Toast.makeText(context, "You do not have permission to delete this post", Toast.LENGTH_SHORT).show();
-//                            }
-//                                return true;
-//                            default:
-//                                return false;
-//                        }
-//                    }
-//                });
-//
-//                // Hiển thị PopupMenu
-//                popupMenu.show();
-//            }
-//        });
     }
 
     @Override
@@ -246,10 +160,6 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
         }
     }
 
-//    private void retrievePostsFromDatabase() {
-//        posts.clear();
-//        posts.addAll(databaseHelper.getAllPosts());
-//        notifyDataSetChanged();
-//    }
+
 
 }

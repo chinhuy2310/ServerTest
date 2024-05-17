@@ -59,17 +59,6 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
             }
         }
 
-        RelativeLayout topRelativeLayout = view.findViewById(R.id.topRelativeLayout);
-//        topRelativeLayout.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(getActivity(), AddPostActivity.class);
-//                User user = (User) bundle.getSerializable("user");
-//                intent.putExtra("user",user);
-//                startActivity(intent);
-//            }
-//        });
-
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         postList = new ArrayList<>();
@@ -137,4 +126,107 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
         intent.putExtra("user", user);
         startActivity(intent);
     }
+
+
+    public void likePost(int userId, int postId)  {
+        if (userId != -1) {
+            LikeRequest likeRequest = new LikeRequest(userId, postId);
+            Call<Void> call = apiService.likePost(likeRequest);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+//                        for (int i = 0; i < postList.size(); i++) {
+//                            Post post = postList.get(i);
+//                            if (post.getPostId() == postId) {
+//                                post.setIsLiked(post.getIsLiked() == 1 ? 0 : 1);
+//                                post.setLikeCount(post.getIsLiked() == 1 ? post.getLikeCount() + 1 : post.getLikeCount() - 1);
+//                                if(post.getIsLiked()==1){
+//                                    post.setIsLiked(0);
+//                                    post.setLikeCount(post.getLikeCount()-1);
+//                                }else {
+//                                    post.setIsLiked(1);
+//                                    post.setLikeCount(post.getLikeCount()+1);
+//                                }
+//                                adapter.notifyItemChanged(i);
+//                                retrievePostsFromServer();
+//                                break;
+//                            }
+//                        }
+
+                        // Notify the adapter of the data set change
+                        retrievePostsFromServer();
+
+                        adapter.notifyDataSetChanged();
+                        Log.e("like","ok");
+                    } else {
+                        // Xử lý lỗi
+                        Log.e("like","response : " + response.message());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    // Xử lý lỗi kết nối
+                }
+            });
+        } else {
+            // Xử lý trường hợp không tìm thấy userid
+        }
+    }
+//    public void likePost(int userId, int postId) {
+//        if (userId != -1) {
+//            LikeRequest likeRequest = new LikeRequest(userId, postId);
+//            Call<Void> call = apiService.likePost(likeRequest);
+//            call.enqueue(new Callback<Void>() {
+//                @Override
+//                public void onResponse(Call<Void> call, Response<Void> response) {
+//                    if (response.isSuccessful()) {
+//                        for (int i = 0; i < postList.size(); i++) {
+//                            Post post = postList.get(i);
+//                            if (post.getPostId() == postId) {
+//                                // Đảo trạng thái like
+//                                int currentLikeState = post.getIsLiked();
+//                                post.setIsLiked(currentLikeState == 1 ? 0 : 1);
+//                                // Tăng hoặc giảm số lượng like tùy thuộc vào trạng thái like
+//                                post.setLikeCount(currentLikeState == 1 ? post.getLikeCount() - 1 : post.getLikeCount() + 1);
+//                                // Thông báo cho Adapter biết rằng chỉ có item i được thay đổi
+//                                adapter.notifyItemChanged(i);
+//                                break; // Thoát khỏi vòng lặp sau khi tìm thấy bài đăng cần cập nhật
+//                            }
+//                        }
+//                        Log.e("like","ok");
+//                    } else {
+//                        // Xử lý lỗi
+//                        Log.e("like","response : " + response.message());
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<Void> call, Throwable t) {
+//                    // Xử lý lỗi kết nối
+//                }
+//            });
+//
+//            // Ngay sau khi gửi yêu cầu like, cập nhật trạng thái nút like mà không chờ phản hồi từ server
+//            for (int i = 0; i < postList.size(); i++) {
+//                Post post = postList.get(i);
+//                if (post.getPostId() == postId) {
+//                    // Đảo trạng thái like
+//                    int currentLikeState = post.getIsLiked();
+//                    post.setIsLiked(currentLikeState == 1 ? 0 : 1);
+//                    // Tăng hoặc giảm số lượng like tùy thuộc vào trạng thái like
+//                    post.setLikeCount(currentLikeState == 1 ? post.getLikeCount() - 1 : post.getLikeCount() + 1);
+//                    // Thông báo cho Adapter biết rằng chỉ có item i được thay đổi
+//                    adapter.notifyItemChanged(i);
+//                    break; // Thoát khỏi vòng lặp sau khi tìm thấy bài đăng cần cập nhật
+//                }
+//            }
+//        } else {
+//            // Xử lý trường hợp không tìm thấy userId
+//        }
+//    }
+
+
+
 }

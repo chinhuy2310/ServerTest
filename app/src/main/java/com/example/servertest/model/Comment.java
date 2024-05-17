@@ -3,14 +3,14 @@ package com.example.servertest.model;
 import java.io.Serializable;
 
 public class Comment implements Serializable {
+    private String avatar_image;
     private String username;
-    private String avatarUrl;
-    private String content;
+    private String comment_content;
 
-    public Comment(String avatarUrl,String username, String content) {
+    public Comment(String avatar_image,String username, String comment_content) {
+        this.avatar_image = avatar_image;
         this.username = username;
-        this.avatarUrl = avatarUrl;
-        this.content = content;
+        this.comment_content = comment_content;
     }
 
     public String getUsername() {
@@ -22,18 +22,16 @@ public class Comment implements Serializable {
     }
 
     public String getAvatarUrl() {
-        return avatarUrl;
+        return avatar_image;
     }
 
     public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
+        this.avatar_image = avatarUrl;
     }
 
     public String getContent() {
-        return content;
+        return comment_content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+
 }

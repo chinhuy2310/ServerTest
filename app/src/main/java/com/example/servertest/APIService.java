@@ -1,17 +1,19 @@
 package com.example.servertest;
+import com.example.servertest.model.Comment;
 import com.example.servertest.model.Post;
 import com.example.servertest.model.User;
 import com.example.servertest.model.UserResponse;
+
+
 
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+
 
 public interface APIService {
     @POST("login")
@@ -26,11 +28,41 @@ public interface APIService {
     Call<List<Post>> getPopularPosts();
     @GET("allposts")
     Call<List<Post>> getAllPost();
+    @POST("likepost")
+    Call<Void> likePost(@Body LikeRequest likeRequest);
 
 
+    @GET("post/{post_id}")
+    Call<Post> getPost(@Path("post_id") int postId);
+
+    @GET("/comments/{post_id}")
+    Call<List<Comment>> getComments(@Path("post_id") int postId);
+
+    @POST("/addcomment")
+    Call<Void> addComment(@Body CommentData commentData);
 
 }
+class CommentData {
+    private int userId;
+    private int postId;
+    private String commentContent;
 
+    public CommentData(int userId, int postId, String commentContent) {
+        this.userId = userId;
+        this.postId = postId;
+        this.commentContent = commentContent;
+    }
+}
+
+class LikeRequest {
+    private int userId;
+    private int postId;
+
+    public LikeRequest(int userId, int postId) {
+        this.userId = userId;
+        this.postId = postId;
+    }
+}
 class LoginRequest {
     private String useraccname;
     private String password;

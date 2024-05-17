@@ -10,25 +10,26 @@ public class Post implements Serializable {
     private String username;
     private String date;
     private String post_title;
-    private String content;
+    private String post_content;
     private String imageUrls;
     private int isRecipe;
     private List<Comment> comments;
     private int isLiked;
+    private int likeCount;
+    private int commentCount;
 
-    public Post(int user_id,int post_id,String avatar_image, String username, String date, String post_title, String content, String imageUrls, int isRecipe,List<Comment> comments) {
-        this.user_id = user_id;
-        this.avatar_image = avatar_image;
-        this.username = username;
-        this.date = date;
-        this.post_title = post_title;
-        this.content = content;
-        this.imageUrls = imageUrls;
-        this.isRecipe = isRecipe;
-        this.comments = comments;
-        this.post_id = post_id;
-        this.isLiked = isLiked;
-    }
+//    public Post(int user_id,int post_id,String avatar_image, String username, String date, String post_title, String content, String imageUrls, int isRecipe,List<Comment> comments) {
+//        this.user_id = user_id;
+//        this.avatar_image = avatar_image;
+//        this.username = username;
+//        this.date = date;
+//        this.post_title = post_title;
+//        this.content = content;
+//        this.imageUrls = imageUrls;
+//        this.isRecipe = isRecipe;
+//        this.comments = comments;
+//        this.post_id = post_id;
+//    }
 
     public int getPostId() {return post_id;}
 
@@ -62,12 +63,9 @@ public class Post implements Serializable {
     }
 
     public String getContent() {
-        return content;
+        return post_content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
 
     public String getImageUrls() {
         return imageUrls;
@@ -84,11 +82,22 @@ public class Post implements Serializable {
     }
 
 
-    public int isLiked() {
+    public int getIsLiked() {
         return isLiked;
     }
 
-    public void setLiked(int liked) {isLiked = isLiked;}
+    public int getLikeCount() {
+        return likeCount;
+    }
 
 
+    public int getCommentCount() {
+        return commentCount;
+    }
+
+    public void setLikeCount(int i) {
+    }
+
+    public void setIsLiked(int i) {
+    }
 }
