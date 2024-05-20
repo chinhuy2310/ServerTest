@@ -138,7 +138,7 @@ app.post('/addpost', (req, res) => {
   const { userId, postGroupId, isRecipe, post_title, post_content, imageUrls } = req.body;
 
   const sqlInsertPost = 'INSERT INTO posts (user_id, post_group, is_recipe, post_title, post_content) VALUES (?, ?, ?, ?, ?)';
-  connection.query(sqlInsertPost, [userId, postGroupId, isRecipe, post_title, content], (err, results) => {
+  connection.query(sqlInsertPost, [userId, postGroupId, isRecipe, post_title, post_content], (err, results) => {
     if (err) {
       console.error('Error executing query:', err.sqlMessage);
       return res.status(500).json({ error: 'Internal server error' });
