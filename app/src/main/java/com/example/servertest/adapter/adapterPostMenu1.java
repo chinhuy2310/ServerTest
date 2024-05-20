@@ -67,6 +67,13 @@ public class adapterPostMenu1 extends RecyclerView.Adapter<adapterPostMenu1.View
                 firstImageUrl = imageUrlArray[0];
             }
         }
+//        List<String> imageUrls = post.getImageUrlList();
+//        String firstImageUrl = null;
+//        if (imageUrls != null && !imageUrls.isEmpty()) {
+//            firstImageUrl = imageUrls.get(0);
+//            Log.e("img",String.valueOf(firstImageUrl));
+//        }
+
 
         if (firstImageUrl != null && !firstImageUrl.isEmpty()) {
             Picasso.get().load(firstImageUrl).into(holder.imageView);

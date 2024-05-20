@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,12 +17,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="Please select a category"/>
+            android:text="Please select a category" />
         <Spinner
             android:id="@+id/spinner"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical" />
     </LinearLayout>
 
     <!-- Tiêu đề -->
@@ -45,6 +46,18 @@
         android:gravity="top"
         android:layout_weight="1"
         android:minLines="5"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/imageViewSelected"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginHorizontal="10dp"
+        android:background="#20808080"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:visibility="gone"
+        android:orientation="horizontal"
+        />
+
     <!-- Button để chọn ảnh từ bộ nhớ -->
     <Button
         android:id="@+id/buttonChooseImage"
@@ -55,14 +68,7 @@
         android:padding="10dp"/>
 
     <!-- Recyclerview để hiển thị ảnh đã chọn -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/imageViewSelected"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:visibility="gone"/>
+
 
     <!-- Nút gửi bài viết -->
     <Button

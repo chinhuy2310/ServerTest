@@ -108,6 +108,8 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
                 firstImageUrl = imageUrlArray[0];
             }
         }
+
+
         if (firstImageUrl != null && !firstImageUrl.isEmpty()) {
             Picasso.get().load(firstImageUrl).into(holder.imageViewPost);
             holder.imageViewPost.setVisibility(View.VISIBLE);

@@ -1,7 +1,11 @@
 package com.example.servertest;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -20,20 +24,30 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.servertest.adapter.SelectedImageAdapter;
 import com.example.servertest.adapter.spinnerAdapter;
 
+import com.example.servertest.model.ImageResponse;
 import com.example.servertest.model.ItemData;
+import com.example.servertest.model.Post;
 import com.example.servertest.model.User;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
 public class AddPostActivity extends AppCompatActivity {
 
+    private static final int PICK_IMAGE_REQUEST = 1;
     private CheckBox checkBoxIsRecipe;
     private EditText editTextTitle;
     private EditText editTextContent;
@@ -42,9 +56,9 @@ public class AddPostActivity extends AppCompatActivity {
     private Button buttonSubmit;
     private User loggedInUser;
     private Spinner spinner;
-    private APIService apiService;
     private boolean isSpinnerOpen = false;
-
+    private APIService apiService;
+    private ProgressDialog progressDialog;
 
 
     @Override
@@ -57,9 +71,9 @@ public class AddPostActivity extends AppCompatActivity {
             loggedInUser = (User) intent.getSerializableExtra("user");
             Log.e("userid dang nhap","trang addpost :"+loggedInUser.getUserId());
         }
+        apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
 
         // Ánh xạ các view từ layout
-        apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
         checkBoxIsRecipe = findViewById(R.id.checkBoxIsRecipe);
         editTextTitle = findViewById(R.id.editTextTitle);
         editTextContent = findViewById(R.id.editTextContent);
@@ -72,7 +86,6 @@ public class AddPostActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        // Lúc bắt đầu chạm vào Spinner, kiểm tra và ẩn bàn phím nếu cần
                         if (isSpinnerOpen==false) {
                             InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -82,14 +95,21 @@ public class AddPostActivity extends AppCompatActivity {
                         }
                         break;
                     case MotionEvent.ACTION_UP:
-                        // Khi nhả chạm, cập nhật trạng thái của Spinner
                         isSpinnerOpen = false;
                         break;
                 }
                 return false;
             }
         });
-
+        buttonChooseImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true); // Cho phép chọn nhiều ảnh
+                startActivityForResult(intent, PICK_IMAGE_REQUEST);
+            }
+        });
         // Thiết lập layout manager cho RecyclerView
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -109,36 +129,108 @@ public class AddPostActivity extends AppCompatActivity {
         buttonSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Lấy thông tin từ các trường nhập trên giao diện
-                String title = editTextTitle.getText().toString().trim();
-                String content = editTextContent.getText().toString().trim();
-                boolean isRecipe = checkBoxIsRecipe.isChecked();
+                //                // Lấy thông tin từ các trường nhập trên giao diện
+                String post_title = editTextTitle.getText().toString().trim();
+                String post_content = editTextContent.getText().toString().trim();
+                int isRecipe = checkBoxIsRecipe.isChecked() ? 1 : 0;
 
                 // Kiểm tra xem tiêu đề và nội dung có rỗng không
-                if (title.isEmpty() || content.isEmpty()) {
+                if (post_title.isEmpty() || post_content.isEmpty()) {
                     Toast.makeText(AddPostActivity.this, "Please fill in the title and content completely", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 int userId = loggedInUser.getUserId();
-//                Log.e("usid", String.valueOf(userId));
-
-                // Lấy ID của mục đã chọn từ Spinner
                 ItemData selectedItem = (ItemData) spinner.getSelectedItem();
-                int groupPostId = selectedItem.getGroupId(); // Lấy ID của mục đã chọn
-//                long postId = databaseHelper.insertPost(userId, groupPostId, isRecipe ? 1 : 0, title, content, new ArrayList<String>());
-//                if (postId != -1) {
-//                    Toast.makeText(AddPostActivity.this, "sent successfully", Toast.LENGTH_SHORT).show();
-////                    Intent intent = new Intent(AddPostActivity.this, Menu2Fragment.class);
-//                    finish(); // Đóng Activity sau khi gửi bài viết thành công
-////                    startActivity(intent);
-//                } else {
-//                    Toast.makeText(AddPostActivity.this, "Đã xảy ra lỗi khi gửi bài viết", Toast.LENGTH_SHORT).show();
-//                }
+                int postGroupId = selectedItem.getGroupId(); // Lấy ID của mục đã chọn
+                List<String> imageList = ((SelectedImageAdapter) imageViewSelected.getAdapter()).getImageUrls();
+
+                // Gửi dữ liệu bài viết và ảnh lên server
+                sendPostToServer(userId, postGroupId, isRecipe, post_title, post_content, imageList);
+            }
+        });
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Posting...");
+    }
+    private void sendPostToServer(int userId, int postGroupId, int isRecipe, String post_title, String post_content, List<String> imageList) {
+        progressDialog.show();
+
+        List<MultipartBody.Part> parts = new ArrayList<>();
+        for (String imagePath : imageList) {
+            String realPath = getRealPathFromUri(Uri.parse(imagePath));
+            File file = new File(realPath);
+            if (file.exists()) {
+                Log.e("Image Path", realPath);
+                Log.e("Image File", file.getName());
+                // Tạo MultipartBody.Part từ file và thêm vào danh sách
+                RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), file);
+                MultipartBody.Part part = MultipartBody.Part.createFormData("images", file.getName(), requestBody);
+                parts.add(part);
+            } else {
+                Log.e("File Not Found", "File not found at: " + realPath);
+            }
+        }
+
+
+        Call<ImageResponse> call = apiService.uploadImages(parts);
+        call.enqueue(new Callback<ImageResponse>() {
+            @Override
+            public void onResponse(Call<ImageResponse> call, Response<ImageResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<String> imageUrls = response.body().getImageUrls();
+                    createPost(userId, postGroupId, isRecipe, post_title, post_content, imageUrls);
+
+                } else {
+                    progressDialog.dismiss();
+                    Toast.makeText(AddPostActivity.this, "Failed to upload images", Toast.LENGTH_SHORT).show();
+                    Log.e("Upload Error", "Response Code: " + response.code() + ", Message: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ImageResponse> call, Throwable t) {
+                progressDialog.dismiss();
+                Toast.makeText(AddPostActivity.this, "Failed to upload images: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("Failed : ",t.getMessage());
+            }
+
+        });
+    }
+    private String getRealPathFromUri(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null) {
+            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            String filePath = cursor.getString(columnIndex);
+            cursor.close();
+            return filePath;
+        } else {
+            return uri.getPath(); // Fallback to Uri.getPath()
+        }
+    }
+
+    private void createPost(int userId, int postGroupId, int isRecipe, String postTitle, String postContent, List<String> imageList) {
+        Call<Void> call = apiService.addPost(userId, postGroupId, isRecipe, postTitle, postContent, imageList);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                progressDialog.dismiss();
+                if (response.isSuccessful()) {
+                    Toast.makeText(AddPostActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(AddPostActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                progressDialog.dismiss();
+                Toast.makeText(AddPostActivity.this, "Failed to create post: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -147,7 +239,54 @@ public class AddPostActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            if (data.getClipData() != null) {
+                // Nếu người dùng đã chọn nhiều ảnh
+                int count = data.getClipData().getItemCount();
+                List<Uri> imageUris = new ArrayList<>();
+                for (int i = 0; i < count; i++) {
+                    Uri imageUri = data.getClipData().getItemAt(i).getUri();
+                    imageUris.add(imageUri);
+                    // Ví dụ:
+                    // String imagePath = imageUri.getPath();
+                }
+                displaySelectedImages(imageUris);
+            } else if (data.getData() != null) {
+                // Nếu người dùng chỉ chọn một ảnh
+                Uri imageUri = data.getData();
+                List<Uri> imageUris = new ArrayList<>();
+                imageUris.add(imageUri);
+                // Ví dụ:
+                // String imagePath = imageUri.getPath();
+                displaySelectedImages(imageUris);
+            }
+        }
+    }
+    private void displaySelectedImages(List<Uri> imageUris) {
+        List<String> imagePaths = new ArrayList<>();
+        for (Uri uri : imageUris) {
+            // Lấy đường dẫn của ảnh và thêm vào danh sách
+            String imagePath = uri.toString();
+            imagePaths.add(imagePath);
+        }
+        if (!imagePaths.isEmpty()) {
+            // Tạo adapter và thiết lập cho RecyclerView
+            SelectedImageAdapter adapter1 = new SelectedImageAdapter(this, imagePaths);
+            adapter1.setOnListEmptyListener(new SelectedImageAdapter.OnListEmptyListener() {
+                @Override
+                public void onListEmpty() {
+                    imageViewSelected.setVisibility(View.GONE);
+                }
+            });
+            imageViewSelected.setAdapter(adapter1);
+            imageViewSelected.setVisibility(View.VISIBLE);
+        } else {
+            imageViewSelected.setVisibility(View.GONE);
+        }
+    }
     private void showCancelConfirmationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Confirm Cancel Post");
@@ -166,7 +305,7 @@ public class AddPostActivity extends AppCompatActivity {
         itemgridList.add(new ItemData(R.drawable.seafood, "생선",2));
         itemgridList.add(new ItemData(R.drawable.cereal, "곡류",3));
         itemgridList.add(new ItemData(R.drawable.vegetable, "채소",4));
-//        itemgridList.add(new ItemData(R.drawable.botmi, "간식"));
+        //        itemgridList.add(new ItemData(R.drawable.botmi, "간식"));
         itemgridList.add(new ItemData(R.drawable.dessert, "디저트",5));
         itemgridList.add(new ItemData(R.drawable.cooking, " 끓임",6));
         itemgridList.add(new ItemData(R.drawable.deep_fried, "튀김",7));
@@ -180,5 +319,6 @@ public class AddPostActivity extends AppCompatActivity {
         // Add data for other items here
         return itemgridList;
     }
+
 
 }

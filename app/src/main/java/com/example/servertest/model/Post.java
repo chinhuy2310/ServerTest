@@ -1,44 +1,42 @@
 package com.example.servertest.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 public class Post implements Serializable {
-    private int user_id;
-    private int post_id;
+    private int userId;
+    private int postId;
     private String avatar_image;
     private String username;
     private String date;
     private String post_title;
     private String post_content;
-    private String imageUrls;
     private int isRecipe;
     private List<Comment> comments;
     private int isLiked;
     private int likeCount;
     private int commentCount;
-
-//    public Post(int user_id,int post_id,String avatar_image, String username, String date, String post_title, String content, String imageUrls, int isRecipe,List<Comment> comments) {
-//        this.user_id = user_id;
-//        this.avatar_image = avatar_image;
-//        this.username = username;
-//        this.date = date;
-//        this.post_title = post_title;
-//        this.content = content;
-//        this.imageUrls = imageUrls;
-//        this.isRecipe = isRecipe;
-//        this.comments = comments;
-//        this.post_id = post_id;
-//    }
-
-    public int getPostId() {return post_id;}
+    private int postGroupId;
+    private String imageUrls;
+    private List<String> imageUrlList;
+    public Post(int userId, int postGroupId, int isRecipe, String post_title, String post_content,List<String> imageUrlList) {
+        this.userId = userId;
+        this.postGroupId = postGroupId;
+        this.isRecipe = isRecipe;
+        this.post_title = post_title;
+        this.post_content = post_content;
+//        this.imageUrlList = Arrays.asList(imageUrls.split(","));
+        this.imageUrlList = imageUrlList;
+    }
+    public int getPostId() {return postId;}
 
     public int getId() {
-        return user_id;
+        return userId;
     }
 
-    public void setId(int user_id) {
-        this.user_id = user_id;
+    public void setId(int userId) {
+        this.userId = userId;
     }
 
     public String getAvatarUrl() {
@@ -70,7 +68,7 @@ public class Post implements Serializable {
     public String getImageUrls() {
         return imageUrls;
     }
-
+    public List<String> getImageUrlList(){return imageUrlList;}
 
     public int getIsRecipe() {
         return isRecipe;

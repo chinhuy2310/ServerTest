@@ -58,6 +58,16 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
                 imgviewMAvt.setImageResource(R.drawable.user_icon2);
             }
         }
+        RelativeLayout topRelativeLayout = view.findViewById(R.id.topRelativeLayout);
+        topRelativeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddPostActivity.class);
+                User user = (User) bundle.getSerializable("user");
+                intent.putExtra("user",user);
+                startActivity(intent);
+            }
+        });
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
