@@ -1,0 +1,373 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const mysql = require('mysql');
+
+const path = require('path');
+
+const app = express();
+
+const hostname = '0.0.0.0';
+const port = 3000;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+// Static folder for serving uploaded images
+
+
+// Database connection
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '1234',
+  database: 'foodapp'
+}); 
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Error connecting to database:', err);
+    return;
+  }
+  console.log('Connected to database!');
+});
+
+
+
+// Định nghĩa thư mục chứa ảnh uploads
+const uploadsDir = path.join(__dirname, 'uploads');
+
+// Sử dụng express.static để cung cấp truy cập tĩnh đến thư mục uploads
+app.use('/uploads', express.static(uploadsDir));
+
+
+// API endpoint for login
+app.post('/login', (req, res) => {
+  const { useraccname, password } = req.body;
+  if (!useraccname ||!password) {
+    return res.status(400).json({ error: 'Useraccname and password are required' });
+  }
+
+  const query = 'SELECT * FROM users WHERE useraccname =? AND password =?';
+  connection.query(query, [useraccname, password], (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err.sqlMessage);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const user = results[0];
+    // Return user object with correct property names
+    res.status(200).json({ message: 'Login successful', user: {
+      user_id: user.user_id,
+      username: user.username,
+      useraccname: user.useraccname,
+      email: user.email,
+      avatar_image: user.avatar_image,
+      cover_image: user.cover_image,
+      is_admin: user.is_admin
+    } });
+  });
+});
+
+app.get('/user/:useraccname', (req, res) => {
+  const useraccname = req.params.useraccname;
+
+  const query = 'SELECT user_id,username,useraccname,email,avatar_image,cover_image,is_admin FROM users WHERE useraccname =?';
+  connection.query(query, [useraccname], (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err.sqlMessage);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = results[0];
+    // Return user object with correct property names
+    res.status(200).json({ message: 'User found', user: {
+      user_id: user.user_id,
+      username: user.username,
+      useraccname: user.useraccname,
+      email: user.email,
+      avatar_image: user.avatar_image,
+      cover_image: user.cover_image,
+      is_admin: user.is_admin
+    } });
+  });
+});
+
+
+
+
+app.post('/likepost', (req, res) => {
+  const { userId, postId } = req.body;
+  if (!userId || !postId) {
+    return res.status(400).json({ error: 'Missing userId or postId' });
+  }
+
+  const checkQuery = 'SELECT * FROM likes WHERE user_id = ? AND post_id = ?';
+  connection.query(checkQuery, [userId, postId], (checkErr, checkResults) => {
+    if (checkErr) {
+      console.error('Error checking like:', checkErr.stack);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (checkResults.length > 0) {
+      unlikePost(userId, postId, res);
+    } else {
+      likePost(userId, postId, res);
+    }
+  });
+});
+
+const likePost = (userId, postId, res) => {
+  const likeQuery = 'INSERT INTO likes (user_id, post_id) VALUES (?, ?)';
+  connection.query(likeQuery, [userId, postId], (likeErr, likeResults) => {
+    if (likeErr) {
+      console.error('Error liking post:', likeErr.stack);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    res.status(200).json({ message: 'Post liked successfully' });
+    // updateLikeCount(postId, res);
+  });
+};
+
+const unlikePost = (userId, postId, res) => {
+  const unlikeQuery = 'DELETE FROM likes WHERE user_id = ? AND post_id = ?';
+  connection.query(unlikeQuery, [userId, postId], (unlikeErr, unlikeResults) => {
+    if (unlikeErr) {
+      console.error('Error unliking post:', unlikeErr.stack);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    res.status(200).json({ message: 'Post unliked successfully' });
+    // updateLikeCount(postId, res);
+  });
+};
+
+
+
+app.get('/comments/:post_id', (req, res) => {
+  const postId = req.params.post_id;
+  const sql = `SELECT u.avatar_image, u.username, c.comment_content
+               FROM comments c
+               INNER JOIN users u ON c.user_id = u.user_id
+               WHERE c.post_id = ?
+               ORDER BY c.created_at DESC;`;
+
+  connection.query(sql, [postId], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(result);
+  });
+});
+
+
+app.post('/addcomment', (req, res) => {
+  const { userId, postId, commentContent } = req.body;
+
+  // Kiểm tra xem các trường bắt buộc đã được cung cấp hay chưa
+  if (!userId || !postId || !commentContent) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  // Thêm comment vào cơ sở dữ liệu
+  const query = `
+    INSERT INTO comments (user_id, post_id, comment_content)
+    VALUES (?, ?, ?)
+  `;
+  connection.query(query, [userId, postId, commentContent], (err, results) => {
+    if (err) {
+      console.error('Error adding comment:', err.stack);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    // Trả về kết quả thành công nếu không có lỗi
+    res.status(200).json({ message: 'Comment added successfully' });
+  });
+});
+
+
+
+app.get('/post/:post_id', (req, res) => {
+  const post_id = req.query.post_id;
+  const userId = req.query.user_id;
+  // Thực hiện truy vấn cơ sở dữ liệu để lấy thông tin của bài đăng dựa trên post_id
+  const query = `
+  SELECT 
+      users.avatar_image,
+      posts.*,
+      users.username,
+	  GROUP_CONCAT(DISTINCT photos.image_url ORDER BY photos.photo_id) AS imageUrls,
+	  COUNT(DISTINCT likes.like_id) AS likeCount,
+    (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    FROM likes 
+    WHERE likes.post_id = posts.post_id AND likes.user_id = ?) AS isLiked,
+   COUNT(DISTINCT comments.comment_id) AS commentCount
+    FROM 
+      posts 
+    JOIN 
+      users  ON posts.user_id = users.user_id
+    LEFT JOIN 
+      photos ON posts.post_id = photos.post_id
+    LEFT JOIN 
+      likes ON posts.post_id = likes.post_id
+    LEFT JOIN 
+      comments ON posts.post_id = comments.post_id
+    WHERE 
+      posts.post_id = ?
+    GROUP BY 
+      posts.post_id, users.avatar_image, users.username
+    ORDER BY 
+      posts.created_at DESC;
+
+
+`;
+  connection.query(query, [userId, post_id], (err, results) => {
+    if (err) {
+      console.error('Error retrieving post:', err.stack);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    
+    // Kiểm tra xem bài đăng có tồn tại không
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Trả về thông tin chi tiết của bài đăng
+    const post = results[0];
+    res.status(200).json(post);
+  });
+});
+
+
+// 
+app.post('/signup', (req, res) => {
+  const { username, useraccname, email, password, avatar_image, cover_image } = req.body;
+  if (!username || !useraccname || !email || !password) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+
+  connection.query('SELECT * FROM users WHERE useraccname = ?', [useraccname], (err, results) => {
+    if (err) {
+      
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    if (results.length > 0) {
+      return res.status(400).json({ error: 'Account ID already exists' });
+    }
+
+    
+    connection.query('INSERT INTO users (username, useraccname, email, password, avatar_image, cover_image) VALUES (?, ?, ?, ?,"","")', [username, useraccname, email, password, avatar_image, cover_image], (err, results) => {
+      if (err) {
+        console.error('Error inserting new user:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+    
+      res.status(201).json({ message: 'User registration successful' });
+    });
+  });
+});
+
+
+app.get('/popularposts', (req, res) => {
+  // Define the SQL query to get popular posts
+  const userId = req.query.user_id;
+  const query = `
+  SELECT 
+    
+
+    posts.*,
+
+    GROUP_CONCAT(DISTINCT photos.image_url ORDER BY photos.photo_id) AS imageUrls,
+	  COUNT(DISTINCT likes.like_id) AS likeCount,
+    (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    FROM likes 
+    WHERE likes.post_id = posts.post_id AND likes.user_id = ?) AS isLiked,
+   COUNT(DISTINCT comments.comment_id) AS commentCount
+    FROM 
+      posts 
+    JOIN 
+      users  ON posts.user_id = users.user_id
+    LEFT JOIN 
+      photos ON posts.post_id = photos.post_id
+    LEFT JOIN 
+      likes ON posts.post_id = likes.post_id
+    LEFT JOIN 
+      comments ON posts.post_id = comments.post_id
+WHERE 
+    posts.created_at >= DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+GROUP BY 
+    posts.post_id
+ORDER BY 
+    likeCount DESC
+LIMIT 5;
+  `;
+  // Execute the query and return the results
+  connection.query(query, [userId], (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+app.get('/allposts', (req, res) => {
+  const userId = req.query.user_id;
+  // console.log("User ID:", userId); 
+  const query = `
+  SELECT 
+      users.avatar_image,
+      posts.*,
+      users.username,
+      GROUP_CONCAT(DISTINCT photos.image_url ORDER BY photos.photo_id) AS imageUrls,
+      COUNT(DISTINCT likes.like_id) AS likeCount,
+      (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+       FROM likes 
+       WHERE likes.post_id = posts.post_id AND likes.user_id = ?) AS isLiked,
+      COUNT(DISTINCT comments.comment_id) AS commentCount
+    FROM 
+      posts 
+    JOIN 
+      users  ON posts.user_id = users.user_id
+    LEFT JOIN 
+      photos ON posts.post_id = photos.post_id
+    LEFT JOIN 
+      likes ON posts.post_id = likes.post_id
+    LEFT JOIN 
+      comments ON posts.post_id = comments.post_id
+    GROUP BY 
+      posts.post_id, users.avatar_image, users.username
+    ORDER BY 
+      posts.created_at DESC;
+  `;
+  // Execute the query and return the results
+  connection.query(query, [userId], (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+
+
+
+app.get('/users', (req, res) => {
+  const query = 'SELECT * FROM users';
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    res.status(200).json({ users: results });
+  });
+});
+
+
+
+// Start the server
+app.listen(port, hostname, () => {
+    console.log(`Server running at http://${hostname}:${port}/`);
+});
