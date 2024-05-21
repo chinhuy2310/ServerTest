@@ -86,30 +86,29 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
     }
 
     private void retrievePostsFromServer() {
-        Call<List<Post>> call = apiService.getAllPost();
+        int userId = (user != null) ? user.getUserId() : -1; // Thay đổi userId tùy theo cách bạn lấy userId
+        Call<List<Post>> call = apiService.getAllPost(userId);
         call.enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
                 if (response.isSuccessful()) {
-                    // Nếu yêu cầu thành công, cập nhật danh sách bài đăng và thông báo Adapter
                     List<Post> posts = response.body();
+                    updateIsLiked(posts);
                     postList.clear();
                     postList.addAll(posts);
                     adapter.notifyDataSetChanged();
                 } else {
-                    // Xử lý khi yêu cầu không thành công
                     Log.e("API Error", "Failed to retrieve posts: " + response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
-                // Xử lý khi yêu cầu gặp lỗi
                 Log.e("API Error", "Failed to retrieve posts: " + t.getMessage());
             }
         });
-
     }
+
 
     // Phương thức trong interface OnPostClickListener
     @Override
@@ -124,6 +123,17 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
         intent.putExtra("user", user);
         startActivity(intent);
     }
+    private void updateIsLiked(List<Post> serverPosts) {
+        for (Post serverPost : serverPosts) {
+            for (Post localPost : postList) {
+                if (serverPost.getPostId() == localPost.getPostId()) {
+                    localPost.setIsLiked(serverPost.getIsLiked());
+                    break;
+                }
+            }
+        }
+    }
+
     public void onCommentClick(int position) {
         // Lấy đối tượng Post tại vị trí được nhấn
         Post clickedPost = postList.get(position);
@@ -184,58 +194,6 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
             // Xử lý trường hợp không tìm thấy userid
         }
     }
-//    public void likePost(int userId, int postId) {
-//        if (userId != -1) {
-//            LikeRequest likeRequest = new LikeRequest(userId, postId);
-//            Call<Void> call = apiService.likePost(likeRequest);
-//            call.enqueue(new Callback<Void>() {
-//                @Override
-//                public void onResponse(Call<Void> call, Response<Void> response) {
-//                    if (response.isSuccessful()) {
-//                        for (int i = 0; i < postList.size(); i++) {
-//                            Post post = postList.get(i);
-//                            if (post.getPostId() == postId) {
-//                                // Đảo trạng thái like
-//                                int currentLikeState = post.getIsLiked();
-//                                post.setIsLiked(currentLikeState == 1 ? 0 : 1);
-//                                // Tăng hoặc giảm số lượng like tùy thuộc vào trạng thái like
-//                                post.setLikeCount(currentLikeState == 1 ? post.getLikeCount() - 1 : post.getLikeCount() + 1);
-//                                // Thông báo cho Adapter biết rằng chỉ có item i được thay đổi
-//                                adapter.notifyItemChanged(i);
-//                                break; // Thoát khỏi vòng lặp sau khi tìm thấy bài đăng cần cập nhật
-//                            }
-//                        }
-//                        Log.e("like","ok");
-//                    } else {
-//                        // Xử lý lỗi
-//                        Log.e("like","response : " + response.message());
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Call<Void> call, Throwable t) {
-//                    // Xử lý lỗi kết nối
-//                }
-//            });
-//
-//            // Ngay sau khi gửi yêu cầu like, cập nhật trạng thái nút like mà không chờ phản hồi từ server
-//            for (int i = 0; i < postList.size(); i++) {
-//                Post post = postList.get(i);
-//                if (post.getPostId() == postId) {
-//                    // Đảo trạng thái like
-//                    int currentLikeState = post.getIsLiked();
-//                    post.setIsLiked(currentLikeState == 1 ? 0 : 1);
-//                    // Tăng hoặc giảm số lượng like tùy thuộc vào trạng thái like
-//                    post.setLikeCount(currentLikeState == 1 ? post.getLikeCount() - 1 : post.getLikeCount() + 1);
-//                    // Thông báo cho Adapter biết rằng chỉ có item i được thay đổi
-//                    adapter.notifyItemChanged(i);
-//                    break; // Thoát khỏi vòng lặp sau khi tìm thấy bài đăng cần cập nhật
-//                }
-//            }
-//        } else {
-//            // Xử lý trường hợp không tìm thấy userId
-//        }
-//    }
 
 
 

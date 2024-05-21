@@ -1,6 +1,5 @@
 package com.example.servertest;
 import com.example.servertest.model.Comment;
-import com.example.servertest.model.ImageResponse;
 import com.example.servertest.model.Post;
 import com.example.servertest.model.User;
 import com.example.servertest.model.UserResponse;
@@ -9,18 +8,12 @@ import com.example.servertest.model.UserResponse;
 
 import java.util.List;
 
-import okhttp3.MultipartBody;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
-import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 
 public interface APIService {
@@ -33,15 +26,16 @@ public interface APIService {
     @POST("signup")
     Call<Void> signup(@Body SignupRequest signupRequest);
     @GET("popularposts")
-    Call<List<Post>> getPopularPosts();
+    Call<List<Post>> getPopularPosts(@Query("user_id") int userId);
     @GET("allposts")
-    Call<List<Post>> getAllPost();
+    Call<List<Post>> getAllPost(@Query("user_id") int userId);
+
     @POST("likepost")
     Call<Void> likePost(@Body LikeRequest likeRequest);
 
 
     @GET("post/{post_id}")
-    Call<Post> getPost(@Path("post_id") int postId);
+    Call<Post> getPost(@Query("post_id") int postId,@Query("user_id") int userId);
 
     @GET("/comments/{post_id}")
     Call<List<Comment>> getComments(@Path("post_id") int postId);
@@ -49,21 +43,6 @@ public interface APIService {
     @POST("/addcomment")
     Call<Void> addComment(@Body CommentData commentData);
 
-
-    @POST("upload")
-    @Multipart
-    Call<ImageResponse> uploadImages(@Part List<MultipartBody.Part> images);
-
-    @FormUrlEncoded
-    @POST("addpost") // Thay thế "addpost" bằng endpoint tương ứng trên server của bạn
-    Call<Void> addPost(
-            @Field("userId") int userId,
-            @Field("postGroupId") int postGroupId,
-            @Field("isRecipe") int isRecipe,
-            @Field("post_title") String post_title,
-            @Field("post_content") String post_content,
-            @Field("imageList") List<String> imageList
-    );
 }
 class CommentData {
     private int userId;

@@ -92,7 +92,8 @@ public class Menu1Fragment extends Fragment {
     }
 
     private void getPopularPostsFromServer() {
-        Call<List<Post>> call = apiService.getPopularPosts();
+        int userId = (user != null) ? user.getUserId() : -1;
+        Call<List<Post>> call = apiService.getPopularPosts(userId);
         call.enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {

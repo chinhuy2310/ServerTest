@@ -68,6 +68,7 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
         holder.textViewTitle.setText(post.getTitle());
         holder.buttonLike.setTag(post.getPostId());
         int isLiked = post.getIsLiked();
+
         holder.buttonLike.setImageResource(isLiked == 1 ? R.drawable.ic_liked : R.drawable.like);
         holder.buttonLike.setOnClickListener(new View.OnClickListener() {
             @Override

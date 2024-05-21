@@ -238,8 +238,7 @@ public class PostDetail extends AppCompatActivity {
         }
     }
     public void likePost(int userId, int postId)  {
-        Log.e("userid: ", String.valueOf(userId));
-        Log.e("postId: ", String.valueOf(postId));
+
         if (userId != -1) {
             LikeRequest likeRequest = new LikeRequest(userId, postId);
             Call<Void> call = apiService.likePost(likeRequest);
@@ -361,7 +360,8 @@ public class PostDetail extends AppCompatActivity {
     }
 
     private void getPost() {
-        Call<Post> call = apiService.getPost(postId);
+        int userId = (user != null) ? user.getUserId() : -1;
+        Call<Post> call = apiService.getPost(postId,userId);
         call.enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, Response<Post> response) {

@@ -27,21 +27,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.servertest.adapter.SelectedImageAdapter;
 import com.example.servertest.adapter.spinnerAdapter;
 
-import com.example.servertest.model.ImageResponse;
+
 import com.example.servertest.model.ItemData;
 import com.example.servertest.model.Post;
 import com.example.servertest.model.User;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -139,62 +135,14 @@ public class AddPostActivity extends AppCompatActivity {
                     Toast.makeText(AddPostActivity.this, "Please fill in the title and content completely", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 int userId = loggedInUser.getUserId();
                 ItemData selectedItem = (ItemData) spinner.getSelectedItem();
                 int postGroupId = selectedItem.getGroupId(); // Lấy ID của mục đã chọn
-                List<String> imageList = ((SelectedImageAdapter) imageViewSelected.getAdapter()).getImageUrls();
 
-                // Gửi dữ liệu bài viết và ảnh lên server
-                sendPostToServer(userId, postGroupId, isRecipe, post_title, post_content, imageList);
             }
         });
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Posting...");
-    }
-    private void sendPostToServer(int userId, int postGroupId, int isRecipe, String post_title, String post_content, List<String> imageList) {
-        progressDialog.show();
-
-        List<MultipartBody.Part> parts = new ArrayList<>();
-        for (String imagePath : imageList) {
-            String realPath = getRealPathFromUri(Uri.parse(imagePath));
-            File file = new File(realPath);
-            if (file.exists()) {
-                Log.e("Image Path", realPath);
-                Log.e("Image File", file.getName());
-                // Tạo MultipartBody.Part từ file và thêm vào danh sách
-                RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), file);
-                MultipartBody.Part part = MultipartBody.Part.createFormData("images", file.getName(), requestBody);
-                parts.add(part);
-            } else {
-                Log.e("File Not Found", "File not found at: " + realPath);
-            }
-        }
-
-
-        Call<ImageResponse> call = apiService.uploadImages(parts);
-        call.enqueue(new Callback<ImageResponse>() {
-            @Override
-            public void onResponse(Call<ImageResponse> call, Response<ImageResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<String> imageUrls = response.body().getImageUrls();
-                    createPost(userId, postGroupId, isRecipe, post_title, post_content, imageUrls);
-
-                } else {
-                    progressDialog.dismiss();
-                    Toast.makeText(AddPostActivity.this, "Failed to upload images", Toast.LENGTH_SHORT).show();
-                    Log.e("Upload Error", "Response Code: " + response.code() + ", Message: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ImageResponse> call, Throwable t) {
-                progressDialog.dismiss();
-                Toast.makeText(AddPostActivity.this, "Failed to upload images: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("Failed : ",t.getMessage());
-            }
-
-        });
     }
     private String getRealPathFromUri(Uri uri) {
         String[] projection = {MediaStore.Images.Media.DATA};
@@ -210,27 +158,6 @@ public class AddPostActivity extends AppCompatActivity {
         }
     }
 
-    private void createPost(int userId, int postGroupId, int isRecipe, String postTitle, String postContent, List<String> imageList) {
-        Call<Void> call = apiService.addPost(userId, postGroupId, isRecipe, postTitle, postContent, imageList);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                progressDialog.dismiss();
-                if (response.isSuccessful()) {
-                    Toast.makeText(AddPostActivity.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    Toast.makeText(AddPostActivity.this, "Failed to create post", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                progressDialog.dismiss();
-                Toast.makeText(AddPostActivity.this, "Failed to create post: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

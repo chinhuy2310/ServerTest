@@ -55,7 +55,7 @@ public class adapterPostMenu1 extends RecyclerView.Adapter<adapterPostMenu1.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         Post post = postList.get(position);
-        Log.e("ImageURL", "URL: " + post.getImageUrls());
+
 
         String firstImageUrl = null;
         if (post.getImageUrls() instanceof String) {
