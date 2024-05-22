@@ -135,6 +135,64 @@ app.post('/api/posts', upload.array('images', 5), (req, res) => {
 });
 
 
+app.get('/api/search', (req, res) => {
+  const { groupId, searchText } = req.query;
+  
+  let query = `
+    SELECT 
+      users.avatar_image, 
+      posts.*, 
+      users.username, 
+      GROUP_CONCAT(DISTINCT photos.image_url ORDER BY photos.photo_id) AS imageUrls, 
+      COUNT(DISTINCT likes.like_id) AS likeCount, 
+      COUNT(DISTINCT comments.comment_id) AS commentCount 
+    FROM 
+      posts 
+    JOIN 
+      users ON posts.user_id = users.user_id 
+    LEFT JOIN 
+      photos ON posts.post_id = photos.post_id 
+    LEFT JOIN 
+      likes ON posts.post_id = likes.post_id 
+    LEFT JOIN 
+      comments ON posts.post_id = comments.post_id 
+  `;
+  
+  let conditions = [];
+  let params = [];
+  
+  if (groupId !=0) {
+    conditions.push('posts.post_group = ?');
+    params.push(groupId);
+  }
+  
+  if (searchText) {
+    conditions.push('(posts.post_title LIKE ? OR posts.post_content LIKE ?)');
+    params.push(`%${searchText}%`, `%${searchText}%`);
+  }
+  
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ');
+  }
+  
+  query += `
+    GROUP BY 
+      posts.post_id, 
+      users.avatar_image, 
+      users.username 
+    ORDER BY 
+      posts.created_at DESC
+  `;
+  
+  connection.query(query, params, (err, results) => {
+    if (err) {
+      console.error('Lỗi thực thi truy vấn:', err);
+      return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+    }
+    res.json(results);
+  });
+});
+
 app.post('/likepost', (req, res) => {
   const { userId, postId } = req.body;
   if (!userId || !postId) {
