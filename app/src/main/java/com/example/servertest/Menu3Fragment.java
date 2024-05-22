@@ -196,6 +196,8 @@ public class Menu3Fragment extends Fragment {
         if (searchEditText != null) {
             searchEditText.setText("");
         }
+        filterButton.setVisibility(View.GONE);
+        searchButtonL.setVisibility(View.GONE);
 //        retrievePostsByGroupFromDatabase();
         groupID=0;
         LinearLayout linearLayout = getView().findViewById(R.id.filterLayout);
@@ -214,30 +216,6 @@ public class Menu3Fragment extends Fragment {
             return position ; // Các mục khác
         }
     }
-    // Phương thức để lấy dữ liệu từ cơ sở dữ liệu dựa trên groupId
-//    private void fetchDataFromDatabase(int groupId, String searchText) {
-        // Thực hiện truy vấn cơ sở dữ liệu dựa trên groupId và từ được tìm kiếm
-        // Tạo một đối tượng DatabaseHelper
-//        DatabaseHelper databaseHelper = new DatabaseHelper(getActivity());
-//
-//        // Xóa dữ liệu cũ từ postList
-//        postList.clear();
-//
-//        // Thực hiện truy vấn cơ sở dữ liệu và lấy dữ liệu dựa trên groupId và từ được tìm kiếm
-//        if (groupId == 0) {
-//            // Trường hợp groupId là 0 (mục "All"): lấy tất cả bài đăng có chứa từ được tìm kiếm
-//            postList.addAll(databaseHelper.searchPost(searchText));
-//        } else {
-//            // Trường hợp groupId khác 0: lấy bài đăng theo groupId và chứa từ được tìm kiếm
-//            postList.addAll(databaseHelper.getPostsByGroupIdAndSearchText(groupId, searchText));
-//        }
-
-        // Cập nhật dữ liệu trong adapter
-//        adapter.notifyDataSetChanged();
-
-        // Hiển thị hoặc ẩn emptyView tùy thuộc vào kết quả truy vấn
-//        this.groupID = groupId;
-//    }
     private void updateEmptyViewVisibility() {
         if (postList.isEmpty()) {
             recyclerView.setVisibility(View.GONE);
@@ -249,7 +227,6 @@ public class Menu3Fragment extends Fragment {
     }
     public void fetchDataFromApi(int groupId, String searchText) {
         this.groupID=groupId;
-        Log.e("groupid: ", String.valueOf(groupId)+" txt:  "+searchText);
         Call<List<Post>> call = apiService.getSearch(groupId, searchText);
         call.enqueue(new Callback<List<Post>>() {
             @Override
@@ -276,32 +253,6 @@ public class Menu3Fragment extends Fragment {
     }
 
 
-
-//    public void refreshPostsByGroupFromDatabase(int groupId) {
-//        this.groupID = groupId;
-//        retrievePostsByGroupFromDatabase();
-////        retrieveDataCalled = true;
-//    }
-//    private void retrievePostsByGroupFromDatabase() {
-//        if (getActivity() != null) {
-//            DatabaseHelper databaseHelper = new DatabaseHelper(getActivity());
-//            if (postList == null) {
-//                postList = new ArrayList<>();
-//            } else {
-//                postList.clear();
-//            }
-//            postList.addAll(databaseHelper.getPostsByGroupId(groupID));
-//            adapter.notifyDataSetChanged();
-//
-//            if (postList.isEmpty()) {
-//                recyclerView.setVisibility(View.GONE);
-//                emptyView.setVisibility(View.VISIBLE);
-//            } else {
-//                recyclerView.setVisibility(View.VISIBLE);
-//                emptyView.setVisibility(View.GONE);
-//            }
-//        }
-//    }
 
     private class MyOnPostClickListener implements adapterPostMenu1.OnPostClickListener {
         @Override
