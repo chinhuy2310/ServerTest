@@ -1,11 +1,22 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
+const multer  = require('multer');
 
 const path = require('path');
 
 const app = express();
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
 
+const upload = multer({ storage: storage });
 const hostname = '0.0.0.0';
 const port = 3000;
 
@@ -101,6 +112,27 @@ app.get('/user/:useraccname', (req, res) => {
 });
 
 
+app.post('/api/posts', upload.array('images', 5), (req, res) => {
+  const { post_title, post_content, isRecipe, user_id, post_group } = req.body;
+  const imageUrls = req.files.map(file => `http://172.16.4.192:3000/uploads/${file.filename}`); // Lấy đường dẫn của các ảnh đã tải lên
+
+  // Lưu thông tin bài viết vào CSDL
+  const query = 'INSERT INTO posts (post_title, post_content, is_recipe, user_id, post_group) VALUES (?, ?, ?, ?, ?)';
+  connection.query(query, [post_title, post_content, isRecipe, user_id, post_group], (error, results, fields) => {
+    if (error) throw error;
+
+    const post_id = results.insertId;
+
+    // Lưu đường dẫn của ảnh vào CSDL
+    imageUrls.forEach(imageUrl => {
+      connection.query('INSERT INTO photos (post_id, image_url) VALUES (?, ?)', [post_id, imageUrl], (error, results, fields) => {
+        if (error) throw error;
+      });
+    });
+
+    res.status(201).send('Post created successfully');
+  });
+});
 
 
 app.post('/likepost', (req, res) => {
