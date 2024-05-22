@@ -57,6 +57,9 @@ public interface APIService {
     @POST("/addcomment")
     Call<Void> addComment(@Body CommentData commentData);
 
+    @GET("/api/search")
+    Call<List<Post>> getSearch(@Query("groupId") int groupId, @Query("searchText") String searchText);
+
 }
 class CommentData {
     private int userId;

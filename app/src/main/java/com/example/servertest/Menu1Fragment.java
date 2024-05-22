@@ -67,7 +67,7 @@ public class Menu1Fragment extends Fragment {
                     // add activity/intent here
                     Toast.makeText(requireContext(), item.getItemgridName(), Toast.LENGTH_SHORT).show();
                     int groupId = item.getGroupId();
-//                    ((MainActivity)requireActivity()).switchToMenu3Fragment(groupId);
+                    ((MainActivity)requireActivity()).switchToMenu3Fragment(groupId);
                 }
             });
             gridLayout.addView(itemView);
