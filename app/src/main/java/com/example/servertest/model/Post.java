@@ -12,7 +12,7 @@ public class Post implements Serializable {
     private String post_title;
     private String post_content;
     private String imageUrls;
-    private int isRecipe;
+    private int is_recipe;
     private List<Comment> comments;
     private int isLiked;
     private int likeCount;
@@ -62,7 +62,7 @@ public class Post implements Serializable {
 
 
     public int getIsRecipe() {
-        return isRecipe;
+        return is_recipe;
     }
 
 
@@ -84,8 +84,6 @@ public class Post implements Serializable {
         return commentCount;
     }
 
-    public void setLikeCount(int i) {
-    }
 
     public void setIsLiked(int i) {
     }

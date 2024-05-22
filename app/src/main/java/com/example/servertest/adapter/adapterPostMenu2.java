@@ -68,7 +68,7 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
         holder.textViewTitle.setText(post.getTitle());
         holder.buttonLike.setTag(post.getPostId());
         int isLiked = post.getIsLiked();
-
+        int isRecipe = post.getIsRecipe();
         holder.buttonLike.setImageResource(isLiked == 1 ? R.drawable.ic_liked : R.drawable.like);
         holder.buttonLike.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,8 +85,7 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
 
 
 
-        holder.txtRecipe.setVisibility(post.getIsRecipe() == 1 ? View.VISIBLE : View.GONE);
-
+        holder.txtRecipe.setVisibility(isRecipe == 1 ? View.VISIBLE : View.GONE);
         int likeCount = post.getLikeCount();
         int commentCount = post.getCommentCount();
         holder.likeCountTextView.setText(String.valueOf(likeCount));

@@ -8,10 +8,14 @@ import com.example.servertest.model.UserResponse;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -33,6 +37,16 @@ public interface APIService {
     @POST("likepost")
     Call<Void> likePost(@Body LikeRequest likeRequest);
 
+    @Multipart
+    @POST("/api/posts")
+    Call<Void> createPostWithImages(
+            @Part("post_title") RequestBody postTitle,
+            @Part("post_content") RequestBody postContent,
+            @Part("isRecipe") RequestBody isRecipe,
+            @Part("user_id") RequestBody userId,
+            @Part("post_group") RequestBody postGroup,
+            @Part List<MultipartBody.Part> images
+    );
 
     @GET("post/{post_id}")
     Call<Post> getPost(@Query("post_id") int postId,@Query("user_id") int userId);
