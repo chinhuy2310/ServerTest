@@ -54,7 +54,9 @@ public class PostDetail extends AppCompatActivity {
     private EditText writecomment;
     private APIService apiService;
     private User user;
+    private Post post;
     private int postId;
+
 
 
 
@@ -62,7 +64,6 @@ public class PostDetail extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.post_detail);
-
 
 
         Intent intent = getIntent();
@@ -77,7 +78,7 @@ public class PostDetail extends AppCompatActivity {
             // Xử lý trường hợp Intent không chứa "user"
             Log.e("PostDetail", "Intent does not contain 'user' extra");
         }
-        Post post = (Post) getIntent().getSerializableExtra("POST_DETAIL");
+        post = (Post) getIntent().getSerializableExtra("POST_DETAIL");
         postId = intent.getIntExtra("POST_ID", -1);
         int userId = user.getUserId();
         // Ánh xạ các thành phần UI từ layout
@@ -228,7 +229,6 @@ public class PostDetail extends AppCompatActivity {
                 Toast.makeText(PostDetail.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
     }
     public void sendComment() {
         if (user != null) {
@@ -314,6 +314,51 @@ public class PostDetail extends AppCompatActivity {
         });
         builder.create().show();
     }
+    public void deleteCommentConfirmation(int commentId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Confirm Deletion");
+        builder.setMessage("Are you sure you want to delete this comment?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Thực hiện yêu cầu API để xóa bài đăng
+                deleteComment(commentId);
+
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Đóng dialog và không làm gì cả
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
+    public void deleteComment(int commentId) {
+        Call<Void> call = apiService.deleteComment(commentId);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Xóa comment thành công, cập nhật danh sách comment
+                    getComments();
+                    Toast.makeText(PostDetail.this, "Comment deleted", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Xử lý khi có lỗi xảy ra
+                    Toast.makeText(PostDetail.this, "Failed to delete comment", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Xử lý khi gặp lỗi kết nối hoặc lỗi không xác định
+                Toast.makeText(PostDetail.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void deletePost() {
         Call<Void> call = apiService.deletePost(postId);
         call.enqueue(new Callback<Void>() {
@@ -390,8 +435,11 @@ public class PostDetail extends AppCompatActivity {
         // Hiển thị danh sách các comment trong RecyclerView
         if (comments != null && !comments.isEmpty()) {
             recyclerViewComments.setVisibility(View.VISIBLE);
-            recyclerViewComments.setLayoutManager(new LinearLayoutManager(this));
-            recyclerViewComments.setAdapter(new CommentAdapter(this, comments));
+//            recyclerViewComments.setLayoutManager(new LinearLayoutManager(this));
+//            recyclerViewComments.setAdapter(new CommentAdapter(this, comments));
+            CommentAdapter adapter = new CommentAdapter(this, comments,post);
+            adapter.setUser(user);
+            recyclerViewComments.setAdapter(adapter);
         } else {
             recyclerViewComments.setVisibility(View.GONE);
         }
@@ -445,7 +493,6 @@ public class PostDetail extends AppCompatActivity {
                     Post post = response.body();
 
                     displayPostDetails(post);
-
                 } else {
                     Log.e("a", "Failed to get post detail: " + response.message());
                 }

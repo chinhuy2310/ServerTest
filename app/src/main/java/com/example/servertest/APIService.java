@@ -43,6 +43,9 @@ public interface APIService {
     @DELETE("/api/deleteposts/{postId}")
     Call<Void> deletePost(@Path("postId") int postId);
 
+    @DELETE("/api/deletecomments/{commentId}")
+    Call<Void> deleteComment(@Path("commentId") int commentId);
+
     @Multipart
     @POST("/api/createposts")
     Call<Void> createPostWithImages(
