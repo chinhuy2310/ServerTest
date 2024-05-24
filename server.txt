@@ -331,7 +331,7 @@ const unlikePost = (userId, postId, res) => {
 
 app.get('/comments/:post_id', (req, res) => {
   const postId = req.params.post_id;
-  const sql = `SELECT u.avatar_image, u.username, c.comment_content
+  const sql = `SELECT u.avatar_image, u.username, c.*
                FROM comments c
                INNER JOIN users u ON c.user_id = u.user_id
                WHERE c.post_id = ?
@@ -368,6 +368,27 @@ app.post('/addcomment', (req, res) => {
 
     // Trả về kết quả thành công nếu không có lỗi
     res.status(200).json({ message: 'Comment added successfully' });
+  });
+});
+
+
+app.delete('/api/deletecomments/:commentId', (req, res) => {
+  const commentId = req.params.commentId;
+
+  // Xóa comment từ bảng comments
+  const deleteCommentQuery = 'DELETE FROM comments WHERE comment_id = ?';
+
+  connection.query(deleteCommentQuery, [commentId], (err, result) => {
+    if (err) {
+      console.error('Error deleting comment:', err.stack);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    res.status(200).json({ message: 'Comment deleted successfully' });
   });
 });
 
