@@ -31,7 +31,8 @@ const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '1234',
-  database: 'foodapp'
+  database: 'foodapp',
+  dateStrings: true
 }); 
 
 connection.connect((err) => {
@@ -112,9 +113,18 @@ app.get('/user/:useraccname', (req, res) => {
 });
 
 
-app.post('/api/posts', upload.array('images', 5), (req, res) => {
+app.post('/api/createposts', upload.array('images', 5), (req, res) => {
   const { post_title, post_content, isRecipe, user_id, post_group } = req.body;
   const imageUrls = req.files.map(file => `http://172.16.4.192:3000/uploads/${file.filename}`); // Lấy đường dẫn của các ảnh đã tải lên
+
+  // let imageUrls = [];
+  // if (req.files.length > 0) {
+  //   // Nếu có ảnh, lấy đường dẫn của các ảnh đã tải lên
+  //   imageUrls = req.files.map(file => `http://172.16.4.192:3000/uploads/${file.filename}`);
+  // } else {
+  //   // Nếu không có ảnh, gán một chuỗi rỗng vào imageUrls
+  //   imageUrls.push('');
+  // }
 
   // Lưu thông tin bài viết vào CSDL
   const query = 'INSERT INTO posts (post_title, post_content, is_recipe, user_id, post_group) VALUES (?, ?, ?, ?, ?)';
@@ -134,6 +144,143 @@ app.post('/api/posts', upload.array('images', 5), (req, res) => {
   });
 });
 
+// Endpoint để xóa bài viết cùng với các ảnh, bình luận và lượt thích
+app.delete('/api/deleteposts/:postId', (req, res) => {
+  const postId = req.params.postId;
+
+  // Kiểm tra xem postId có tồn tại không
+  connection.query('SELECT * FROM posts WHERE post_id = ?', [postId], (selectErr, selectResults) => {
+    if (selectErr) {
+      console.error('Lỗi khi kiểm tra bài viết:', selectErr);
+      return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+    }
+
+    // Nếu postId không tồn tại, trả về lỗi 404
+    if (selectResults.length === 0) {
+
+      return res.status(404).json({ error: 'Không tìm thấy bài viết' });
+    }
+
+    // Bắt đầu xóa bài viết, các ảnh liên quan, bình luận và lượt thích
+    connection.beginTransaction((beginTransactionErr) => {
+      if (beginTransactionErr) {
+        console.error('Lỗi khi bắt đầu giao dịch:', beginTransactionErr);
+        return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+      }
+
+      // Xóa tất cả các ảnh liên quan đến bài viết từ bảng photos
+      connection.query('DELETE FROM photos WHERE post_id = ?', [postId], (deletePhotosErr, deletePhotosResults) => {
+        if (deletePhotosErr) {
+          connection.rollback(() => {
+            console.error('Lỗi khi xóa ảnh liên quan:', deletePhotosErr);
+            return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+          });
+        }
+
+        // Xóa tất cả các bình luận liên quan đến bài viết từ bảng comments
+        connection.query('DELETE FROM comments WHERE post_id = ?', [postId], (deleteCommentsErr, deleteCommentsResults) => {
+          if (deleteCommentsErr) {
+            connection.rollback(() => {
+              console.error('Lỗi khi xóa bình luận liên quan:', deleteCommentsErr);
+              return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+            });
+          }
+
+          // Xóa tất cả các lượt thích liên quan đến bài viết từ bảng likes
+          connection.query('DELETE FROM likes WHERE post_id = ?', [postId], (deleteLikesErr, deleteLikesResults) => {
+            if (deleteLikesErr) {
+              connection.rollback(() => {
+                console.error('Lỗi khi xóa lượt thích liên quan:', deleteLikesErr);
+                return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+              });
+            }
+
+            // Cuối cùng, xóa bài viết từ bảng posts
+            connection.query('DELETE FROM posts WHERE post_id = ?', [postId], (deletePostErr, deletePostResults) => {
+              if (deletePostErr) {
+                connection.rollback(() => {
+                  console.error('Lỗi khi xóa bài viết:', deletePostErr);
+                  return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+                });
+              }
+
+              // Commit giao dịch
+              connection.commit((commitErr) => {
+                if (commitErr) {
+                  connection.rollback(() => {
+                    console.error('Lỗi khi commit giao dịch:', commitErr);
+                    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+                  });
+                }
+
+                // Nếu xóa thành công, trả về thông báo thành công
+                res.status(200).json({ message: 'Xóa bài viết và các liên quan thành công' });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+app.get('/api/search', (req, res) => {
+  const { groupId, searchText } = req.query;
+  
+  let query = `
+    SELECT 
+      users.avatar_image, 
+      posts.*, 
+      users.username, 
+      GROUP_CONCAT(DISTINCT photos.image_url ORDER BY photos.photo_id) AS imageUrls, 
+      COUNT(DISTINCT likes.like_id) AS likeCount, 
+      COUNT(DISTINCT comments.comment_id) AS commentCount 
+    FROM 
+      posts 
+    JOIN 
+      users ON posts.user_id = users.user_id 
+    LEFT JOIN 
+      photos ON posts.post_id = photos.post_id 
+    LEFT JOIN 
+      likes ON posts.post_id = likes.post_id 
+    LEFT JOIN 
+      comments ON posts.post_id = comments.post_id 
+  `;
+  
+  let conditions = [];
+  let params = [];
+  
+  if (groupId !=0) {
+    conditions.push('posts.post_group = ?');
+    params.push(groupId);
+  }
+  
+  if (searchText) {
+    conditions.push('(posts.post_title LIKE ? OR posts.post_content LIKE ?)');
+    params.push(`%${searchText}%`, `%${searchText}%`);
+  }
+  
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ');
+  }
+  
+  query += `
+    GROUP BY 
+      posts.post_id, 
+      users.avatar_image, 
+      users.username 
+    ORDER BY 
+      posts.created_at DESC
+  `;
+  
+  connection.query(query, params, (err, results) => {
+    if (err) {
+      console.error('Lỗi thực thi truy vấn:', err);
+      return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+    }
+    res.json(results);
+  });
+});
 
 app.post('/likepost', (req, res) => {
   const { userId, postId } = req.body;
@@ -347,6 +494,7 @@ LIMIT 5;
     res.json(results);
   });
 });
+
 app.get('/allposts', (req, res) => {
   const userId = req.query.user_id;
   // console.log("User ID:", userId); 
@@ -384,8 +532,6 @@ app.get('/allposts', (req, res) => {
 });
 
 
-
-
 app.get('/users', (req, res) => {
   const query = 'SELECT * FROM users';
   connection.query(query, (err, results) => {
@@ -396,7 +542,6 @@ app.get('/users', (req, res) => {
     res.status(200).json({ users: results });
   });
 });
-
 
 
 // Start the server
