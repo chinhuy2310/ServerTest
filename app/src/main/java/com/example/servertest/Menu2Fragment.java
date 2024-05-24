@@ -10,7 +10,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -83,6 +85,10 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
         super.onResume();
         retrievePostsFromServer();
 //        inputMethodManager.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+    }
+    @Override
+    public void onDeletePost(int postId, int position) {
+        deletePost(postId, position);
     }
 
     private void retrievePostsFromServer() {
@@ -178,13 +184,11 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
                         retrievePostsFromServer();
 
                         adapter.notifyDataSetChanged();
-                        Log.e("like","ok");
                     } else {
                         // Xử lý lỗi
                         Log.e("like","response : " + response.message());
                     }
                 }
-
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
                     // Xử lý lỗi kết nối
@@ -196,5 +200,45 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
     }
 
 
+    private void deletePost(int postId, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Delete Post")
+                .setMessage("Are you sure you want to delete this post?")
+                .setPositiveButton("OK", (dialog, which) -> {
+                    // Người dùng đã nhấn OK, tiến hành xóa bài đăng
+                    performDeletePost(postId, position);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // Người dùng đã nhấn Cancel, không thực hiện xóa bài đăng
+                    dialog.dismiss(); // Đóng dialog
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+    private void performDeletePost(int postId, int position) {
+        Call<Void> call = apiService.deletePost(postId);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getActivity(), "Post deleted", Toast.LENGTH_SHORT).show();
+                    postList.remove(position);
+                    adapter.notifyItemRemoved(position);
+                } else {
+                    if (response.code() == 404) {
+                        Toast.makeText(getActivity(), "Post "+ postId+" not found", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), "Failed to delete post", Toast.LENGTH_SHORT).show();
+                        Log.e("response","err: " + response.message());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getActivity(), "Network error", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 }

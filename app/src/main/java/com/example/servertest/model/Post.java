@@ -8,7 +8,7 @@ public class Post implements Serializable {
     private int post_id;
     private String avatar_image;
     private String username;
-    private String date;
+    private String created_at;
     private String post_title;
     private String post_content;
     private String imageUrls;
@@ -43,7 +43,7 @@ public class Post implements Serializable {
 
 
     public String getDate() {
-        return date;
+        return created_at;
     }
 
 

@@ -49,9 +49,9 @@ public class Menu5Fragment extends Fragment {
                     imgviewMyAvt.setImageResource(R.drawable.user_icon2);
                     imgviewCover.setImageResource(R.drawable.ic_bg);
                 }
-                Log.e("Menu5Fragment", "Username: " + user.getUsername());
-                Log.e("Menu5Fragment", "Email: " + user.getEmail());
-                Log.e("menu5","userid: "+ user.getUserId());
+//                Log.e("Menu5Fragment", "Username: " + user.getUsername());
+//                Log.e("Menu5Fragment", "Email: " + user.getEmail());
+//                Log.e("menu5","userid: "+ user.getUserId());
             }
         }
 

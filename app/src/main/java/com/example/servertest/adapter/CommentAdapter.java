@@ -1,10 +1,15 @@
 package com.example.servertest.adapter;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,7 +37,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CommentViewHolder holder, @SuppressLint("RecyclerView") int position) {
         Comment comment = commentList.get(position);
         holder.textViewUsername.setText(comment.getUsername());
         holder.textViewContent.setText(comment.getContent());
@@ -45,6 +50,37 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         else{
             Picasso.get().load(R.drawable.user_icon2).into(holder.imageViewCommenterAvatar);
         }
+        holder.postOptions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Tạo PopupMenu
+                PopupMenu popupMenu = new PopupMenu(context, holder.postOptions);
+                popupMenu.inflate(R.menu.post_options_menu); // Sử dụng menu resource đã tạo
+
+                // Xử lý sự kiện khi một item trong PopupMenu được chọn
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.menu_report:
+                                // Xử lý khi chọn Report
+
+                                Toast.makeText(context, "Reported", Toast.LENGTH_SHORT).show();
+                                return true;
+                            case R.id.menu_delete:
+                                Toast.makeText(context, "Delete", Toast.LENGTH_SHORT).show();
+                                return true;
+
+                            default:
+                                return false;
+                        }
+                    }
+                });
+
+                // Hiển thị PopupMenu
+                popupMenu.show();
+            }
+        });
     }
 
     @Override
@@ -53,7 +89,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
     }
 
     public class CommentViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageViewCommenterAvatar;
+        ImageView imageViewCommenterAvatar,postOptions;
         TextView textViewUsername, textViewContent;
 
         public CommentViewHolder(@NonNull View itemView) {
@@ -61,6 +97,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             imageViewCommenterAvatar = itemView.findViewById(R.id.imageViewCommentAvatar);
             textViewUsername = itemView.findViewById(R.id.textViewUsername);
             textViewContent = itemView.findViewById(R.id.textViewComments);
+            postOptions = itemView.findViewById(R.id.postoptions);
         }
     }
 }

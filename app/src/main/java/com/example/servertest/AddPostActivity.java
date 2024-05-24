@@ -69,7 +69,7 @@
             Intent intent = getIntent();
             if (intent != null && intent.hasExtra("user")) {
                 loggedInUser = (User) intent.getSerializableExtra("user");
-                Log.e("userid dang nhap","trang addpost :"+loggedInUser.getUserId());
+//                Log.e("userid dang nhap","trang addpost :"+loggedInUser.getUserId());
             }
             apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
 

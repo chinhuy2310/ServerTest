@@ -6,7 +6,8 @@ public class Comment implements Serializable {
     private String avatar_image;
     private String username;
     private String comment_content;
-
+    private int comment_id ;
+    private int user_id;
     public Comment(String avatar_image,String username, String comment_content) {
         this.avatar_image = avatar_image;
         this.username = username;
@@ -33,5 +34,7 @@ public class Comment implements Serializable {
         return comment_content;
     }
 
+    public int getComment_id(){return comment_id;}
+    public int getUser_id(){return user_id;}
 
 }

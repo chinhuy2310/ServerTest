@@ -12,6 +12,7 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
@@ -29,16 +30,21 @@ public interface APIService {
 
     @POST("signup")
     Call<Void> signup(@Body SignupRequest signupRequest);
+
     @GET("popularposts")
     Call<List<Post>> getPopularPosts(@Query("user_id") int userId);
+
     @GET("allposts")
     Call<List<Post>> getAllPost(@Query("user_id") int userId);
 
     @POST("likepost")
     Call<Void> likePost(@Body LikeRequest likeRequest);
 
+    @DELETE("/api/deleteposts/{postId}")
+    Call<Void> deletePost(@Path("postId") int postId);
+
     @Multipart
-    @POST("/api/posts")
+    @POST("/api/createposts")
     Call<Void> createPostWithImages(
             @Part("post_title") RequestBody postTitle,
             @Part("post_content") RequestBody postContent,
