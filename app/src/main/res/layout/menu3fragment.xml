@@ -38,13 +38,14 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
-                android:layout_marginHorizontal="5dp">
+               >
                 <ImageView
                     android:id="@+id/search_button"
                     android:layout_width="wrap_content"
-                    android:layout_height="35dp"
-                    android:src="@drawable/ic_search"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_searchpng"
                     android:scaleType="centerCrop"
+                    android:layout_marginHorizontal="10dp"
                     />
                 <ImageView
                     android:id="@+id/filterButton"
@@ -53,7 +54,7 @@
                     android:src="@drawable/ic_filter"
                     android:layout_centerVertical="true"
                     android:layout_alignParentRight="true"
-                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginHorizontal="10dp"
                     android:visibility="gone"/>
             </LinearLayout>
             <View

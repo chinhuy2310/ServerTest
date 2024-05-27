@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
 
@@ -119,19 +118,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-//    public void switchToMenu3Fragment(int groupId) {
-//        ViewPagerAdapter adapter = (ViewPagerAdapter) viewPager.getAdapter();
-//        Menu3Fragment menu3Fragment = (Menu3Fragment) adapter.createFragment(2);
-//
-//        // Perform the Fragment transition
-//        if (menu3Fragment != null) {
-//            // Perform any necessary processing before transitioning Fragment (if needed)
-//            menu3Fragment.refreshPostsByGroupFromDatabase(groupId);
-//
-//            // Move to Menu3Fragment
-//            viewPager.setCurrentItem(2, true);
-//        }
-//    }
+    public void switchToMenu3Fragment(int groupId) {
+        ViewPagerAdapter adapter = (ViewPagerAdapter) viewPager.getAdapter();
+        Menu3Fragment menu3Fragment = (Menu3Fragment) adapter.createFragment(2);
+
+        // Perform the Fragment transition
+        if (menu3Fragment != null) {
+            // Perform any necessary processing before transitioning Fragment (if needed)
+            menu3Fragment.fetchDataFromApi(groupId,"");
+
+            // Move to Menu3Fragment
+            viewPager.setCurrentItem(2, true);
+        }
+    }
 //    private void hideKeyboard() {
 //        if (inputMethodManager != null && getCurrentFocus() != null) {
 //            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);

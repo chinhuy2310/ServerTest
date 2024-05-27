@@ -1,22 +1,26 @@
 package com.example.servertest;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,13 +48,15 @@ import retrofit2.Response;
 public class PostDetail extends AppCompatActivity {
     private NestedScrollView netscrollview;
     private ImageButton buttonLike,buttonComment;
-    private ImageView imageViewAvatar,sendComment;
+    private ImageView imageViewAvatar,sendComment,postOptions;
     private TextView textViewUsername, textViewDateTime, textViewTitle, textViewContent, txtRecipe,likeCountTextView,commentCountTextView;
     private RecyclerView recyclerViewImages, recyclerViewComments;
     private EditText writecomment;
     private APIService apiService;
     private User user;
+    private Post post;
     private int postId;
+
 
 
 
@@ -58,7 +64,6 @@ public class PostDetail extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.post_detail);
-
 
 
         Intent intent = getIntent();
@@ -73,7 +78,7 @@ public class PostDetail extends AppCompatActivity {
             // Xử lý trường hợp Intent không chứa "user"
             Log.e("PostDetail", "Intent does not contain 'user' extra");
         }
-        Post post = (Post) getIntent().getSerializableExtra("POST_DETAIL");
+        post = (Post) getIntent().getSerializableExtra("POST_DETAIL");
         postId = intent.getIntExtra("POST_ID", -1);
         int userId = user.getUserId();
         // Ánh xạ các thành phần UI từ layout
@@ -92,6 +97,31 @@ public class PostDetail extends AppCompatActivity {
         likeCountTextView = findViewById(R.id.likeCountTextView);
         commentCountTextView = findViewById(R.id.commentCountTextView);
 
+        postOptions = findViewById(R.id.postoptions);
+        postOptions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popup = new PopupMenu(PostDetail.this, view);
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.post_options_menu, popup.getMenu());
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.menu_report:
+                                Toast.makeText(PostDetail.this, "Reported", Toast.LENGTH_SHORT).show();
+                                return true;
+                            case R.id.menu_delete:
+                                deletePostConfirmation();
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                });
+                popup.show();
+            }
+        });
 
         // Ánh xạ nút like
         buttonLike = findViewById(R.id.buttonLike);
@@ -199,7 +229,6 @@ public class PostDetail extends AppCompatActivity {
                 Toast.makeText(PostDetail.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
     }
     public void sendComment() {
         if (user != null) {
@@ -238,8 +267,7 @@ public class PostDetail extends AppCompatActivity {
         }
     }
     public void likePost(int userId, int postId)  {
-        Log.e("userid: ", String.valueOf(userId));
-        Log.e("postId: ", String.valueOf(postId));
+
         if (userId != -1) {
             LikeRequest likeRequest = new LikeRequest(userId, postId);
             Call<Void> call = apiService.likePost(likeRequest);
@@ -250,7 +278,7 @@ public class PostDetail extends AppCompatActivity {
 
                         getPost();
 
-                        Log.e("like","ok");
+//                        Log.e("like","ok");
                     } else {
                         // Xử lý lỗi
                         Log.e("like","response : " + response.message());
@@ -265,6 +293,93 @@ public class PostDetail extends AppCompatActivity {
         } else {
             // Xử lý trường hợp không tìm thấy userid
         }
+    }
+    private void deletePostConfirmation() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Confirm Deletion");
+        builder.setMessage("Are you sure you want to delete this post?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Thực hiện yêu cầu API để xóa bài đăng
+                deletePost();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Đóng dialog và không làm gì cả
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+    public void deleteCommentConfirmation(int commentId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Confirm Deletion");
+        builder.setMessage("Are you sure you want to delete this comment?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Thực hiện yêu cầu API để xóa bài đăng
+                deleteComment(commentId);
+
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Đóng dialog và không làm gì cả
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
+    public void deleteComment(int commentId) {
+        Call<Void> call = apiService.deleteComment(commentId);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Xóa comment thành công, cập nhật danh sách comment
+                    getComments();
+                    Toast.makeText(PostDetail.this, "Comment deleted", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Xử lý khi có lỗi xảy ra
+                    Toast.makeText(PostDetail.this, "Failed to delete comment", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Xử lý khi gặp lỗi kết nối hoặc lỗi không xác định
+                Toast.makeText(PostDetail.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void deletePost() {
+        Call<Void> call = apiService.deletePost(postId);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Xóa thành công, hiển thị thông báo và kết thúc hoạt động
+                    Toast.makeText(PostDetail.this, "Deleted", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    // Xử lý khi có lỗi xảy ra trong quá trình xóa bài đăng
+                    Toast.makeText(PostDetail.this, "Failed to delete post", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Xử lý khi gặp lỗi kết nối hoặc lỗi không xác định trong quá trình gửi yêu cầu xóa
+                Toast.makeText(PostDetail.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     private void scrollToComments() {
         if (recyclerViewComments != null) {
@@ -300,12 +415,17 @@ public class PostDetail extends AppCompatActivity {
             txtRecipe.setVisibility(View.GONE);
         }
 
-        // Hiển thị danh sách ảnh nếu có
-        List<String> imageUrlList = Arrays.asList(post.getImageUrls().split(","));
-        if (imageUrlList != null && !imageUrlList.isEmpty()) {
-            recyclerViewImages.setVisibility(View.VISIBLE);
-            recyclerViewImages.setLayoutManager(new LinearLayoutManager(this));
-            recyclerViewImages.setAdapter(new PostImageAdapter(this, imageUrlList));
+        String imageUrls = post.getImageUrls();
+        if (imageUrls != null) {
+            // Hiển thị danh sách ảnh nếu có
+            List<String> imageUrlList = Arrays.asList(imageUrls.split(","));
+            if (!imageUrlList.isEmpty()) {
+                recyclerViewImages.setVisibility(View.VISIBLE);
+                recyclerViewImages.setLayoutManager(new LinearLayoutManager(this));
+                recyclerViewImages.setAdapter(new PostImageAdapter(this, imageUrlList));
+            } else {
+                recyclerViewImages.setVisibility(View.GONE);
+            }
         } else {
             recyclerViewImages.setVisibility(View.GONE);
         }
@@ -315,8 +435,11 @@ public class PostDetail extends AppCompatActivity {
         // Hiển thị danh sách các comment trong RecyclerView
         if (comments != null && !comments.isEmpty()) {
             recyclerViewComments.setVisibility(View.VISIBLE);
-            recyclerViewComments.setLayoutManager(new LinearLayoutManager(this));
-            recyclerViewComments.setAdapter(new CommentAdapter(this, comments));
+//            recyclerViewComments.setLayoutManager(new LinearLayoutManager(this));
+//            recyclerViewComments.setAdapter(new CommentAdapter(this, comments));
+            CommentAdapter adapter = new CommentAdapter(this, comments,post);
+            adapter.setUser(user);
+            recyclerViewComments.setAdapter(adapter);
         } else {
             recyclerViewComments.setVisibility(View.GONE);
         }
@@ -361,7 +484,8 @@ public class PostDetail extends AppCompatActivity {
     }
 
     private void getPost() {
-        Call<Post> call = apiService.getPost(postId);
+        int userId = (user != null) ? user.getUserId() : -1;
+        Call<Post> call = apiService.getPost(postId,userId);
         call.enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, Response<Post> response) {
@@ -369,7 +493,6 @@ public class PostDetail extends AppCompatActivity {
                     Post post = response.body();
 
                     displayPostDetails(post);
-
                 } else {
                     Log.e("a", "Failed to get post detail: " + response.message());
                 }

@@ -1,42 +1,33 @@
 package com.example.servertest.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
 public class Post implements Serializable {
-    private int userId;
-    private int postId;
+    private int user_id;
+    private int post_id;
     private String avatar_image;
     private String username;
-    private String date;
+    private String created_at;
     private String post_title;
     private String post_content;
-    private int isRecipe;
+    private String imageUrls;
+    private int is_recipe;
     private List<Comment> comments;
     private int isLiked;
     private int likeCount;
     private int commentCount;
-    private int postGroupId;
-    private String imageUrls;
-    private List<String> imageUrlList;
-    public Post(int userId, int postGroupId, int isRecipe, String post_title, String post_content,List<String> imageUrlList) {
-        this.userId = userId;
-        this.postGroupId = postGroupId;
-        this.isRecipe = isRecipe;
-        this.post_title = post_title;
-        this.post_content = post_content;
-//        this.imageUrlList = Arrays.asList(imageUrls.split(","));
-        this.imageUrlList = imageUrlList;
-    }
-    public int getPostId() {return postId;}
+
+
+
+    public int getPostId() {return post_id;}
 
     public int getId() {
-        return userId;
+        return user_id;
     }
 
-    public void setId(int userId) {
-        this.userId = userId;
+    public void setId(int user_id) {
+        this.user_id = user_id;
     }
 
     public String getAvatarUrl() {
@@ -52,7 +43,7 @@ public class Post implements Serializable {
 
 
     public String getDate() {
-        return date;
+        return created_at;
     }
 
 
@@ -68,10 +59,10 @@ public class Post implements Serializable {
     public String getImageUrls() {
         return imageUrls;
     }
-    public List<String> getImageUrlList(){return imageUrlList;}
+
 
     public int getIsRecipe() {
-        return isRecipe;
+        return is_recipe;
     }
 
 
@@ -93,8 +84,6 @@ public class Post implements Serializable {
         return commentCount;
     }
 
-    public void setLikeCount(int i) {
-    }
 
     public void setIsLiked(int i) {
     }

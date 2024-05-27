@@ -35,12 +35,12 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
     private Context context;
     private OnPostClickListener onPostClickListener;
     private User user;
-    private APIService apiService;
 
     public interface OnPostClickListener {
         void onPostClick(int position);
         void onCommentClick(int position);
         void likePost(int userId, int postId);
+        void onDeletePost(int postId,int position);
 
     }
 
@@ -68,6 +68,7 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
         holder.textViewTitle.setText(post.getTitle());
         holder.buttonLike.setTag(post.getPostId());
         int isLiked = post.getIsLiked();
+        int isRecipe = post.getIsRecipe();
         holder.buttonLike.setImageResource(isLiked == 1 ? R.drawable.ic_liked : R.drawable.like);
         holder.buttonLike.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,9 +84,43 @@ public class adapterPostMenu2 extends RecyclerView.Adapter<adapterPostMenu2.View
 
 
 
+        holder.postOptions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Tạo PopupMenu
+                PopupMenu popupMenu = new PopupMenu(context, holder.postOptions);
+                popupMenu.inflate(R.menu.post_options_menu); // Sử dụng menu resource đã tạo
 
-        holder.txtRecipe.setVisibility(post.getIsRecipe() == 1 ? View.VISIBLE : View.GONE);
+                // Xử lý sự kiện khi một item trong PopupMenu được chọn
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.menu_report:
+                                // Xử lý khi chọn Report
 
+                                Toast.makeText(context, "Reported", Toast.LENGTH_SHORT).show();
+                                return true;
+                            case R.id.menu_delete:
+                                if (post.getId() == user.getUserId() || user.getIsAdmin() == 1) {
+                                    onPostClickListener.onDeletePost(post.getPostId(),position);
+                                } else {
+                                    Toast.makeText(context, "You do not have permission to delete this post", Toast.LENGTH_SHORT).show();
+                                }
+                                return true;
+
+                            default:
+                                return false;
+                        }
+                    }
+                });
+
+                // Hiển thị PopupMenu
+                popupMenu.show();
+            }
+        });
+
+        holder.txtRecipe.setVisibility(isRecipe == 1 ? View.VISIBLE : View.GONE);
         int likeCount = post.getLikeCount();
         int commentCount = post.getCommentCount();
         holder.likeCountTextView.setText(String.valueOf(likeCount));
