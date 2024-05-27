@@ -113,7 +113,7 @@ app.get('/user/:useraccname', (req, res) => {
 });
 
 
-app.post('/api/createposts', upload.array('images', 5), (req, res) => {
+app.post('/api/createposts', upload.array('images', 10), (req, res) => {
   const { post_title, post_content, isRecipe, user_id, post_group } = req.body;
   const imageUrls = req.files.map(file => `http://172.16.4.192:3000/uploads/${file.filename}`); // Lấy đường dẫn của các ảnh đã tải lên
 
@@ -144,7 +144,6 @@ app.post('/api/createposts', upload.array('images', 5), (req, res) => {
   });
 });
 
-// Endpoint để xóa bài viết cùng với các ảnh, bình luận và lượt thích
 app.delete('/api/deleteposts/:postId', (req, res) => {
   const postId = req.params.postId;
 
@@ -392,7 +391,18 @@ app.delete('/api/deletecomments/:commentId', (req, res) => {
   });
 });
 
+app.get('/api/advertisements', (req, res) => {
+  const query = 'SELECT * FROM advertisement;';
+  connection.query(query, (err, results) => {
+      if (err) throw err;
+      const imageUrls = results.map(row => row.advertisement_image);
+      res.json({ advertisement: imageUrls });
+  });
+});
 
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 
 app.get('/post/:post_id', (req, res) => {
   const post_id = req.query.post_id;
@@ -481,10 +491,9 @@ app.get('/popularposts', (req, res) => {
   const userId = req.query.user_id;
   const query = `
   SELECT 
-    
-
-    posts.*,
-
+  users.avatar_image,
+  posts.*,
+  users.username,
     GROUP_CONCAT(DISTINCT photos.image_url ORDER BY photos.photo_id) AS imageUrls,
 	  COUNT(DISTINCT likes.like_id) AS likeCount,
     (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
