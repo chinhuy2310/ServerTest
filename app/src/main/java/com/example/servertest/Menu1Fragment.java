@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.servertest.adapter.adapterPostMenu1;
+import com.example.servertest.model.ImageResponse;
 import com.example.servertest.model.ItemData;
 import com.example.servertest.model.Post;
 import com.example.servertest.model.User;
@@ -72,7 +73,7 @@ public class Menu1Fragment extends Fragment {
             });
             gridLayout.addView(itemView);
         }
-        ActionViewFlipper();
+
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         postList = new ArrayList<>();
@@ -80,7 +81,7 @@ public class Menu1Fragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
-
+        fetchAdvertisementImages();
         // Lấy danh sách các bài viết phổ biến từ máy chủ
         getPopularPostsFromServer();
 
@@ -128,19 +129,41 @@ public class Menu1Fragment extends Fragment {
             startActivity(intent);
         }
     }
+    private void fetchAdvertisementImages() {
+        Call<ImageResponse> call = apiService.getImageUrls();
+        call.enqueue(new Callback<ImageResponse>() {
+            @Override
+            public void onResponse(Call<ImageResponse> call, Response<ImageResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<String> imageUrls = response.body().getAdvertisement();
+                    setupViewFlipper(imageUrls);
+                } else {
+                    Toast.makeText(getActivity(), "Failed to retrieve advertisement images", Toast.LENGTH_SHORT).show();
+                    Log.e("Menu1Fragment", "Response code: " + response.code());
+                    setupViewFlipper(new ArrayList<>());  // Call with empty list to avoid null issues
+                }
+            }
 
-    // Flipper advertisement
-    private void ActionViewFlipper() {
-        ArrayList<String> advertisement = new ArrayList<>();
-        // Add advertisement image URLs to the list
-        advertisement.add("https://img2.daumcdn.net/thumb/R658x0.q70/?fname=https://t1.daumcdn.net/news/202303/28/dailylife/20230328110003580sufq.jpg");
-        advertisement.add("https://static.hubzum.zumst.com/hubzum/2022/02/10/14/3ea39a0f140c44b8b26761a93d11aa18.jpg");
-        advertisement.add("https://dulichlive.com/han-quoc/wp-content/uploads/sites/7/2020/02/10-mon-an-Han-Quoc-khong-cay-ngon-noi-tieng.jpg");
-        advertisement.add("https://forza.com.vn/wp-content/uploads/2021/07/cach-lam-mi-y-thom-ngon-chuan-vi-tai-nha-6.jpeg");
-        for (int i = 0; i < advertisement.size(); i++) {
+            @Override
+            public void onFailure(Call<ImageResponse> call, Throwable t) {
+                Toast.makeText(getActivity(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("Network error: ", t.getMessage());
+                setupViewFlipper(new ArrayList<>());  // Call with empty list to avoid null issues
+            }
+        });
+    }
+
+    private void setupViewFlipper(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            Toast.makeText(getActivity(), "No advertisement images to display", Toast.LENGTH_SHORT).show();
+            Log.e("Menu1Fragment", "Image URL list is null or empty");
+            return;
+        }
+
+        for (String url : imageUrls) {
             ImageView imageView = new ImageView(requireContext());
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            Picasso.get().load(advertisement.get(i)).into(imageView);
+            Picasso.get().load(url).into(imageView);
             viewFlipper.addView(imageView);
         }
         viewFlipper.setFlipInterval(5000);
@@ -150,6 +173,7 @@ public class Menu1Fragment extends Fragment {
         viewFlipper.setInAnimation(animation_slide_in);
         viewFlipper.setOutAnimation(animation_slide_out);
     }
+
 
     private List<ItemData> createItemgridList() {
         List<ItemData> itemgridList = new ArrayList<>();

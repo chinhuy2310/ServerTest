@@ -1,5 +1,6 @@
 package com.example.servertest;
 import com.example.servertest.model.Comment;
+import com.example.servertest.model.ImageResponse;
 import com.example.servertest.model.Post;
 import com.example.servertest.model.User;
 import com.example.servertest.model.UserResponse;
@@ -45,6 +46,10 @@ public interface APIService {
 
     @DELETE("/api/deletecomments/{commentId}")
     Call<Void> deleteComment(@Path("commentId") int commentId);
+
+    @GET("api/advertisements")
+    Call<ImageResponse> getImageUrls();
+
 
     @Multipart
     @POST("/api/createposts")
