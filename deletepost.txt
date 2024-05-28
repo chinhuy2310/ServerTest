@@ -1,0 +1,93 @@
+
+const fs = require('fs');
+
+
+app.delete('/api/deletepost/:postId', (req, res) => {
+  const postId = req.params.postId;
+
+  // Kiểm tra xem postId có tồn tại không
+  connection.query('SELECT * FROM posts WHERE post_id = ?', [postId], (selectErr, selectResults) => {
+    if (selectErr) {
+      console.error('Lỗi khi kiểm tra bài viết:', selectErr);
+      return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+    }
+
+    // Nếu postId không tồn tại, trả về lỗi 404
+    if (selectResults.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy bài viết' });
+    }
+
+    // Bắt đầu xóa bài viết và các liên quan
+    connection.beginTransaction((beginTransactionErr) => {
+      if (beginTransactionErr) {
+        console.error('Lỗi khi bắt đầu giao dịch:', beginTransactionErr);
+        return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+      }
+
+      // Xóa tất cả các ảnh liên quan đến bài viết từ bảng photos
+      connection.query('SELECT image_url FROM photos WHERE post_id = ?', [postId], (selectPhotosErr, selectPhotosResults) => {
+        if (selectPhotosErr) {
+          connection.rollback(() => {
+            console.error('Lỗi khi lấy ảnh liên quan:', selectPhotosErr);
+            return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+          });
+        }
+
+        // Lưu đường dẫn của các ảnh để xóa từ máy chủ
+        const imageUrls = selectPhotosResults.map(row => row.image_url);
+
+        // Xóa các ảnh từ máy chủ
+        imageUrls.forEach(imageUrl => {
+          fs.unlink(imageUrl, (unlinkErr) => {
+            if (unlinkErr) {
+              console.error('Lỗi khi xóa ảnh từ máy chủ:', unlinkErr);
+            }
+          });
+        });
+
+        // Tiếp tục xóa các bình luận liên quan đến bài viết từ bảng comments
+        connection.query('DELETE FROM comments WHERE post_id = ?', [postId], (deleteCommentsErr, deleteCommentsResults) => {
+          if (deleteCommentsErr) {
+            connection.rollback(() => {
+              console.error('Lỗi khi xóa bình luận liên quan:', deleteCommentsErr);
+              return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+            });
+          }
+
+          // Tiếp tục xóa các lượt thích liên quan đến bài viết từ bảng likes
+          connection.query('DELETE FROM likes WHERE post_id = ?', [postId], (deleteLikesErr, deleteLikesResults) => {
+            if (deleteLikesErr) {
+              connection.rollback(() => {
+                console.error('Lỗi khi xóa lượt thích liên quan:', deleteLikesErr);
+                return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+              });
+            }
+
+            // Cuối cùng, xóa bài viết từ bảng posts
+            connection.query('DELETE FROM posts WHERE post_id = ?', [postId], (deletePostErr, deletePostResults) => {
+              if (deletePostErr) {
+                connection.rollback(() => {
+                  console.error('Lỗi khi xóa bài viết:', deletePostErr);
+                  return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+                });
+              }
+
+              // Commit giao dịch
+              connection.commit((commitErr) => {
+                if (commitErr) {
+                  connection.rollback(() => {
+                    console.error('Lỗi khi commit giao dịch:', commitErr);
+                    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+                  });
+                }
+
+                // Nếu xóa thành công, trả về thông báo thành công
+                res.status(200).json({ message: 'Xóa bài viết và các liên quan thành công' });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
