@@ -82,7 +82,9 @@ public class Menu1Fragment extends Fragment {
 
         apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
         fetchAdvertisementImages();
+
         // Lấy danh sách các bài viết phổ biến từ máy chủ
+        
         getPopularPostsFromServer();
 
         return view;
@@ -160,11 +162,24 @@ public class Menu1Fragment extends Fragment {
             return;
         }
 
+        viewFlipper.removeAllViews();  // Clear previous views
+
         for (String url : imageUrls) {
             ImageView imageView = new ImageView(requireContext());
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            Picasso.get().load(url).into(imageView);
-            viewFlipper.addView(imageView);
+            // Use Target to ensure the image is loaded before adding to ViewFlipper
+            Picasso.get().load(url).into(imageView, new com.squareup.picasso.Callback() {
+                @Override
+                public void onSuccess() {
+                    viewFlipper.addView(imageView);
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Log.e("Picasso error", "Error loading image: " + url, e);
+                }
+            });
+            Log.e("ViewFlipper", url);
         }
         viewFlipper.setFlipInterval(5000);
         viewFlipper.setAutoStart(true);
@@ -172,6 +187,11 @@ public class Menu1Fragment extends Fragment {
         Animation animation_slide_out = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_out_right);
         viewFlipper.setInAnimation(animation_slide_in);
         viewFlipper.setOutAnimation(animation_slide_out);
+
+        // Start the flipper if not already started
+        if (!viewFlipper.isFlipping()) {
+            viewFlipper.startFlipping();
+        }
     }
 
 
