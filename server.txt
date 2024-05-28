@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const multer  = require('multer');
 
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const storage = multer.diskStorage({
@@ -143,6 +144,9 @@ app.post('/api/createposts', upload.array('images', 10), (req, res) => {
     res.status(201).send('Post created successfully');
   });
 });
+
+
+
 
 app.delete('/api/deleteposts/:postId', (req, res) => {
   const postId = req.params.postId;
@@ -487,43 +491,58 @@ app.post('/signup', (req, res) => {
 
 
 app.get('/popularposts', (req, res) => {
-  // Define the SQL query to get popular posts
   const userId = req.query.user_id;
-  const query = `
-  SELECT 
-  users.avatar_image,
-  posts.*,
-  users.username,
-    GROUP_CONCAT(DISTINCT photos.image_url ORDER BY photos.photo_id) AS imageUrls,
-	  COUNT(DISTINCT likes.like_id) AS likeCount,
-    (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
-    FROM likes 
-    WHERE likes.post_id = posts.post_id AND likes.user_id = ?) AS isLiked,
-   COUNT(DISTINCT comments.comment_id) AS commentCount
-    FROM 
-      posts 
-    JOIN 
-      users  ON posts.user_id = users.user_id
-    LEFT JOIN 
-      photos ON posts.post_id = photos.post_id
-    LEFT JOIN 
-      likes ON posts.post_id = likes.post_id
-    LEFT JOIN 
-      comments ON posts.post_id = comments.post_id
-WHERE 
-    posts.created_at >= DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
-GROUP BY 
-    posts.post_id
-ORDER BY 
-    likeCount DESC
-LIMIT 5;
-  `;
-  // Execute the query and return the results
-  connection.query(query, [userId], (err, results) => {
-    if (err) throw err;
-    res.json(results);
-  });
+  let daysInterval = 30; // Khởi đầu với 30 ngày
+
+  const getPopularPosts = (days) => {
+    const query = `
+      SELECT 
+        users.avatar_image,
+        posts.*,
+        users.username,
+        GROUP_CONCAT(DISTINCT photos.image_url ORDER BY photos.photo_id) AS imageUrls,
+        COUNT(DISTINCT likes.like_id) AS likeCount,
+        (SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+         FROM likes 
+         WHERE likes.post_id = posts.post_id AND likes.user_id = ?) AS isLiked,
+        COUNT(DISTINCT comments.comment_id) AS commentCount
+      FROM 
+        posts 
+      JOIN 
+        users  ON posts.user_id = users.user_id
+      LEFT JOIN 
+        photos ON posts.post_id = photos.post_id
+      LEFT JOIN 
+        likes ON posts.post_id = likes.post_id
+      LEFT JOIN 
+        comments ON posts.post_id = comments.post_id
+      WHERE 
+        posts.created_at >= DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL ? DAY)
+      GROUP BY 
+        posts.post_id
+      ORDER BY 
+        likeCount DESC
+      LIMIT 5;
+    `;
+    
+    // Thực hiện truy vấn với khoảng thời gian hiện tại
+    connection.query(query, [userId, days], (err, results) => {
+      if (err) throw err;
+      
+      // Nếu số lượng bài viết ít hơn 5 và khoảng thời gian chưa quá lớn, tăng khoảng thời gian và thử lại
+      if (results.length < 5 && days < 365) {
+        getPopularPosts(days + 30); // Tăng khoảng thời gian lên 30 ngày
+      } else {
+        // Trả về kết quả nếu đủ bài viết hoặc đã tăng khoảng thời gian đến mức tối đa
+        res.json(results);
+      }
+    });
+  };
+
+  // Bắt đầu với khoảng thời gian ban đầu
+  getPopularPosts(daysInterval);
 });
+
 
 app.get('/allposts', (req, res) => {
   const userId = req.query.user_id;
