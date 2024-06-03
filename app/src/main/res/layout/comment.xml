@@ -15,7 +15,9 @@
             android:layout_height="45dp"
             android:scaleType="centerCrop"
             android:background="@drawable/custom_border2"/>
-
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -35,8 +37,9 @@
                     android:text="Username"
                     android:textSize="18sp"
                     android:textStyle="bold" />
+
                 <ImageView
-                    android:id="@+id/postoptions"
+                    android:id="@+id/options"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_alignParentRight="true"
@@ -45,12 +48,21 @@
                     android:src="@drawable/menu" />
             </RelativeLayout>
             <TextView
-                android:id="@+id/textViewComments"
+                android:id="@+id/commentContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:textSize="16sp"
                 android:text="asahsfkashfkasfkasgfkasfkasgfhagsfjasgfasgfa\nasdasddasd\nasdasd\nasdasdas"/>
+            <TextView
+                android:id="@+id/commentTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_gravity="right"
+                android:textSize="12sp"
+                android:text="2024-02-31 10:23"/>
         </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
 </RelativeLayout>

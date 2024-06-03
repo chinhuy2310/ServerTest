@@ -9,15 +9,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.servertest.R;
-import com.example.servertest.model.ItemData;
+import com.example.servertest.model.Category;
 
 import java.util.List;
 
-public class spinnerAdapter extends ArrayAdapter<ItemData> {
+public class spinnerAdapter extends ArrayAdapter<Category> {
     private Context context;
-    private List<ItemData> itemList;
+    private List<Category> itemList;
 
-    public spinnerAdapter(Context context, List<ItemData> itemList) {
+    public spinnerAdapter(Context context, List<Category> itemList) {
         super(context, 0, itemList);
         this.context = context;
         this.itemList = itemList;
@@ -34,7 +34,7 @@ public class spinnerAdapter extends ArrayAdapter<ItemData> {
     }
 
     private View createItemView(int position, View convertView, ViewGroup parent) {
-        ItemData item = itemList.get(position);
+        Category item = itemList.get(position);
 
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.spinner_item, parent, false);

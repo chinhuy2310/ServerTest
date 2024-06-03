@@ -43,11 +43,11 @@ public class SelectedImageAdapter extends RecyclerView.Adapter<SelectedImageAdap
     public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         String imageUrl = imageUrls.get(position);
         Picasso.get().load(imageUrl).into(holder.imageViewItem);
+        // Xử lý sự kiện khi nhấn nút Remove
         holder.buttonRemove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Xử lý sự kiện khi nhấn nút Remove
-                // Trong trường hợp này, bạn có thể xóa ảnh tương ứng khỏi danh sách
+                // Xóa ảnh tương ứng khỏi danh sách
                 imageUrls.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, imageUrls.size());

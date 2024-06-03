@@ -61,7 +61,7 @@
                         android:textSize="12sp" />
 
                     <ImageView
-                        android:id="@+id/postoptions"
+                        android:id="@+id/options"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_alignParentRight="true"

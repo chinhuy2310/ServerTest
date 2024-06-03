@@ -28,8 +28,7 @@ import com.example.servertest.adapter.SelectedImageAdapter;
 import com.example.servertest.adapter.spinnerAdapter;
 
 
-import com.example.servertest.model.ItemData;
-import com.example.servertest.model.Post;
+import com.example.servertest.model.Category;
 import com.example.servertest.model.User;
 
 
@@ -69,7 +68,6 @@ public class AddPostActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("user")) {
             loggedInUser = (User) intent.getSerializableExtra("user");
-//                Log.e("userid dang nhap","trang addpost :"+loggedInUser.getUserId());
         }
         apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
 
@@ -119,9 +117,11 @@ public class AddPostActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_back); // Đặt icon back tại đây
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_back);
         }
-        List<ItemData> itemList = createItemgridList();
+
+
+        List<Category> itemList = createItemgridList();
         spinnerAdapter adapter = new spinnerAdapter(this, itemList);
         spinner.setAdapter(adapter);
 
@@ -133,7 +133,7 @@ public class AddPostActivity extends AppCompatActivity {
                 String post_content = editTextContent.getText().toString().trim();
                 int isRecipe = checkBoxIsRecipe.isChecked() ? 1 : 0;
                 int userId = loggedInUser.getUserId();
-                ItemData selectedItem = (ItemData) spinner.getSelectedItem();
+                Category selectedItem = (Category) spinner.getSelectedItem();
                 int postGroupId = selectedItem.getGroupId();
 
                 // Tạo RequestBody để gửi dữ liệu bài viết đến API
@@ -254,23 +254,23 @@ public class AddPostActivity extends AppCompatActivity {
         });
         builder.show();
     }
-    private List<ItemData> createItemgridList() {
-        List<ItemData> itemgridList = new ArrayList<>();
-        itemgridList.add(new ItemData(R.drawable.meat, "고기",1));
-        itemgridList.add(new ItemData(R.drawable.seafood, "생선",2));
-        itemgridList.add(new ItemData(R.drawable.cereal, "곡류",3));
-        itemgridList.add(new ItemData(R.drawable.vegetable, "채소",4));
+    private List<Category> createItemgridList() {
+        List<Category> itemgridList = new ArrayList<>();
+        itemgridList.add(new Category(R.drawable.meat, "고기",1));
+        itemgridList.add(new Category(R.drawable.seafood, "생선",2));
+        itemgridList.add(new Category(R.drawable.cereal, "곡류",3));
+        itemgridList.add(new Category(R.drawable.vegetable, "채소",4));
         //        itemgridList.add(new ItemData(R.drawable.botmi, "간식"));
-        itemgridList.add(new ItemData(R.drawable.dessert, "디저트",5));
-        itemgridList.add(new ItemData(R.drawable.cooking, " 끓임",6));
-        itemgridList.add(new ItemData(R.drawable.deep_fried, "튀김",7));
-        itemgridList.add(new ItemData(R.drawable.soup, " 국",8));
-        itemgridList.add(new ItemData(R.drawable.grill, "구워",9));
-        itemgridList.add(new ItemData(R.drawable.fried, "볶음",10));
-        itemgridList.add(new ItemData(R.drawable.smoothie, "스무티",11));
-        itemgridList.add(new ItemData(R.drawable.ic_delete, "Item 12",12));
-        itemgridList.add(new ItemData(R.drawable.ic_delete, "Item 13",13));
-        itemgridList.add(new ItemData(R.drawable.ic_delete, "Item 14",14));
+        itemgridList.add(new Category(R.drawable.dessert, "디저트",5));
+        itemgridList.add(new Category(R.drawable.cooking, " 끓임",6));
+        itemgridList.add(new Category(R.drawable.deep_fried, "튀김",7));
+        itemgridList.add(new Category(R.drawable.soup, " 국",8));
+        itemgridList.add(new Category(R.drawable.grill, "구워",9));
+        itemgridList.add(new Category(R.drawable.fried, "볶음",10));
+        itemgridList.add(new Category(R.drawable.smoothie, "스무티",11));
+        itemgridList.add(new Category(R.drawable.ic_delete, "Item 12",12));
+        itemgridList.add(new Category(R.drawable.ic_delete, "Item 13",13));
+        itemgridList.add(new Category(R.drawable.ic_delete, "Item 14",14));
         // Add data for other items here
         return itemgridList;
     }

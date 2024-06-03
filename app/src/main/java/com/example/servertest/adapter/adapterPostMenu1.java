@@ -24,27 +24,31 @@ public class adapterPostMenu1 extends RecyclerView.Adapter<adapterPostMenu1.View
     private Context context;
     private OnPostClickListener onPostClickListener;
 
+    // Interface to handle click events on posts
     public interface OnPostClickListener {
         void onPostClick(int position);
     }
 
+    // Constructor to initialize context, post list, and click listener
     public adapterPostMenu1(Context context, List<Post> postList, OnPostClickListener listener) {
         this.context = context;
         this.postList = postList;
         this.onPostClickListener = listener;
     }
 
+    // ViewHolder class to hold and recycle views
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView imageView;
         public TextView textViewTitle;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.imgNewTruyen);
-            textViewTitle = itemView.findViewById(R.id.textviewTenTruyen);
+            imageView = itemView.findViewById(R.id.imgPost);
+            textViewTitle = itemView.findViewById(R.id.postTitle);
         }
     }
 
+    // Inflates the item layout and returns the ViewHolder
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -52,35 +56,32 @@ public class adapterPostMenu1 extends RecyclerView.Adapter<adapterPostMenu1.View
         return new ViewHolder(view);
     }
 
+    // Binds data to the ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         Post post = postList.get(position);
 
-
+        // Extract the first image URL from the imageUrls string
         String firstImageUrl = null;
         if (post.getImageUrls() instanceof String) {
-            // Nếu là một chuỗi, xử lý chuỗi để lấy URL ảnh
+            // Kết quả nhận được từ server là một chuỗi, xử lý chuỗi để lấy URL ảnh
             String imageUrlsString = (String) post.getImageUrls();
-            // Ví dụ: phân tách chuỗi để lấy các URL ảnh
+            //  Phân tách chuỗi để lấy các URL ảnh
             String[] imageUrlArray = imageUrlsString.split(",");
             if (imageUrlArray.length > 0) {
+                // Lấy ảnh đầu tiên trong danh sách
                 firstImageUrl = imageUrlArray[0];
             }
         }
-//        List<String> imageUrls = post.getImageUrlList();
-//        String firstImageUrl = null;
-//        if (imageUrls != null && !imageUrls.isEmpty()) {
-//            firstImageUrl = imageUrls.get(0);
-//            Log.e("img",String.valueOf(firstImageUrl));
-//        }
-
 
         if (firstImageUrl != null && !firstImageUrl.isEmpty()) {
+            // Hiển thị ảnh đầu tiên
             Picasso.get().load(firstImageUrl).into(holder.imageView);
         } else {
+            // Nếu không có ảnh, hiển thị ảnh mặc định
             holder.imageView.setImageResource(R.drawable.food_bg);
         }
-
+        // Hiển thị tiêu đề
         holder.textViewTitle.setText(post.getTitle());
 
         // Handle click event on image
@@ -88,12 +89,14 @@ public class adapterPostMenu1 extends RecyclerView.Adapter<adapterPostMenu1.View
             @Override
             public void onClick(View v) {
                 if (onPostClickListener != null) {
+                    // thực hiện phương thức onPostClick trong menu1Fragment
                     onPostClickListener.onPostClick(position);
                 }
             }
         });
     }
 
+    // Returns the total number of items in the data set
     @Override
     public int getItemCount() {
         return postList.size();

@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.servertest.adapter.adapterPostMenu1;
 import com.example.servertest.model.ImageResponse;
-import com.example.servertest.model.ItemData;
+import com.example.servertest.model.Category;
 import com.example.servertest.model.Post;
 import com.example.servertest.model.User;
 import com.squareup.picasso.Picasso;
@@ -42,22 +42,26 @@ public class Menu1Fragment extends Fragment {
     private adapterPostMenu1 adapter;
     private List<Post> postList;
     private APIService apiService;
-    private List<ItemData> itemgridList;
+    private List<Category> itemgridList;
     private User user;
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.menu1fragment, container, false);
 
+        //nhận thông tin người đăng nhập
         Bundle bundle = getArguments();
         if (bundle != null) {
             user = (User) bundle.getSerializable("user");}
+
+
         viewFlipper = view.findViewById(R.id.viewflipper);
-        // Home menu item list
+
+        // Home menu category list
         itemgridList = createItemgridList();
         GridLayout gridLayout = view.findViewById(R.id.gridLayout);
-        for (final ItemData item : itemgridList) {
-            View itemView = getLayoutInflater().inflate(R.layout.item_grid, gridLayout, false);
-            ImageView imageView = itemView.findViewById(R.id.itemgridImage);
+        for (final Category item : itemgridList) {
+            View itemView = getLayoutInflater().inflate(R.layout.category, gridLayout, false);
+            ImageView imageView = itemView.findViewById(R.id.category);
             TextView textView = itemView.findViewById(R.id.itemgridText);
             // Set image and text for each item
             imageView.setImageResource(item.getImageResId());
@@ -68,6 +72,7 @@ public class Menu1Fragment extends Fragment {
                     // add activity/intent here
                     Toast.makeText(requireContext(), item.getItemgridName(), Toast.LENGTH_SHORT).show();
                     int groupId = item.getGroupId();
+                    // thực hiện phương thức switchToMenu3Fragment trong MainAtivity
                     ((MainActivity)requireActivity()).switchToMenu3Fragment(groupId);
                 }
             });
@@ -76,24 +81,28 @@ public class Menu1Fragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
         postList = new ArrayList<>();
+
         adapter = new adapterPostMenu1(getActivity(), postList, new MyOnPostClickListener());
         recyclerView.setAdapter(adapter);
 
         apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
+
+        // lấy ảnh quảng cáo
         fetchAdvertisementImages();
 
-        // Lấy danh sách các bài viết phổ biến từ máy chủ
-        
+        // Lấy danh sách các bài viết phổ biến
         getPopularPostsFromServer();
 
         return view;
     }
+
     public void onResume() {
         super.onResume();
         getPopularPostsFromServer() ;
     }
-
+    // lấy các bài viết phổ biến
     private void getPopularPostsFromServer() {
         int userId = (user != null) ? user.getUserId() : -1;
         Call<List<Post>> call = apiService.getPopularPosts(userId);
@@ -106,14 +115,14 @@ public class Menu1Fragment extends Fragment {
                     adapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(getActivity(), "Failed to retrieve popular posts", Toast.LENGTH_SHORT).show();
-                    Log.e("Menu1Frament", "Response code: " + response.code());
+//                    Log.e("Menu1Frament", "Response code: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
                 Toast.makeText(getActivity(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("Network error: ",t.getMessage());
+//                Log.e("Network error: ",t.getMessage());
             }
         });
     }
@@ -131,6 +140,8 @@ public class Menu1Fragment extends Fragment {
             startActivity(intent);
         }
     }
+
+    // lấy ảnh quảng cáo
     private void fetchAdvertisementImages() {
         Call<ImageResponse> call = apiService.getImageUrls();
         call.enqueue(new Callback<ImageResponse>() {
@@ -141,24 +152,23 @@ public class Menu1Fragment extends Fragment {
                     setupViewFlipper(imageUrls);
                 } else {
                     Toast.makeText(getActivity(), "Failed to retrieve advertisement images", Toast.LENGTH_SHORT).show();
-                    Log.e("Menu1Fragment", "Response code: " + response.code());
+//                    Log.e("Menu1Fragment", "Response code: " + response.code());
                     setupViewFlipper(new ArrayList<>());  // Call with empty list to avoid null issues
                 }
             }
-
             @Override
             public void onFailure(Call<ImageResponse> call, Throwable t) {
                 Toast.makeText(getActivity(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("Network error: ", t.getMessage());
+//                Log.e("Network error: ", t.getMessage());
                 setupViewFlipper(new ArrayList<>());  // Call with empty list to avoid null issues
             }
         });
     }
-
+    // thiết lập hiển thị của quảng cáo
     private void setupViewFlipper(List<String> imageUrls) {
         if (imageUrls == null || imageUrls.isEmpty()) {
             Toast.makeText(getActivity(), "No advertisement images to display", Toast.LENGTH_SHORT).show();
-            Log.e("Menu1Fragment", "Image URL list is null or empty");
+//            Log.e("Menu1Fragment", "Image URL list is null or empty");
             return;
         }
 
@@ -167,7 +177,6 @@ public class Menu1Fragment extends Fragment {
         for (String url : imageUrls) {
             ImageView imageView = new ImageView(requireContext());
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            // Use Target to ensure the image is loaded before adding to ViewFlipper
             Picasso.get().load(url).into(imageView, new com.squareup.picasso.Callback() {
                 @Override
                 public void onSuccess() {
@@ -194,24 +203,24 @@ public class Menu1Fragment extends Fragment {
         }
     }
 
-
-    private List<ItemData> createItemgridList() {
-        List<ItemData> itemgridList = new ArrayList<>();
-        itemgridList.add(new ItemData(R.drawable.meat, "고기",1));
-        itemgridList.add(new ItemData(R.drawable.seafood, "생선",2));
-        itemgridList.add(new ItemData(R.drawable.cereal, "곡류",3));
-        itemgridList.add(new ItemData(R.drawable.vegetable, "채소",4));
+    // thiết lập các mục category
+    private List<Category> createItemgridList() {
+        List<Category> itemgridList = new ArrayList<>();
+        itemgridList.add(new Category(R.drawable.meat, "고기",1));
+        itemgridList.add(new Category(R.drawable.seafood, "생선",2));
+        itemgridList.add(new Category(R.drawable.cereal, "곡류",3));
+        itemgridList.add(new Category(R.drawable.vegetable, "채소",4));
 //        itemgridList.add(new ItemData(R.drawable.botmi, "간식"));
-        itemgridList.add(new ItemData(R.drawable.dessert, "디저트",5));
-        itemgridList.add(new ItemData(R.drawable.cooking, " 끓임",6));
-        itemgridList.add(new ItemData(R.drawable.deep_fried, "튀김",7));
-        itemgridList.add(new ItemData(R.drawable.soup, " 국",8));
-        itemgridList.add(new ItemData(R.drawable.grill, "구워",9));
-        itemgridList.add(new ItemData(R.drawable.fried, "볶음",10));
-        itemgridList.add(new ItemData(R.drawable.smoothie, "스무티",11));
-        itemgridList.add(new ItemData(R.drawable.ic_delete, "Item 12",12));
-        itemgridList.add(new ItemData(R.drawable.ic_delete, "Item 13",13));
-        itemgridList.add(new ItemData(R.drawable.ic_delete, "Item 14",14));
+        itemgridList.add(new Category(R.drawable.dessert, "디저트",5));
+        itemgridList.add(new Category(R.drawable.cooking, " 끓임",6));
+        itemgridList.add(new Category(R.drawable.deep_fried, "튀김",7));
+        itemgridList.add(new Category(R.drawable.soup, " 국",8));
+        itemgridList.add(new Category(R.drawable.grill, "구워",9));
+        itemgridList.add(new Category(R.drawable.fried, "볶음",10));
+        itemgridList.add(new Category(R.drawable.smoothie, "스무티",11));
+        itemgridList.add(new Category(R.drawable.ic_delete, "Item 12",12));
+        itemgridList.add(new Category(R.drawable.ic_delete, "Item 13",13));
+        itemgridList.add(new Category(R.drawable.ic_delete, "Item 14",14));
         // Add data for other items here
         return itemgridList;
     }

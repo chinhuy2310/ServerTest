@@ -45,6 +45,7 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
         apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
 
 //        inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        // nhận thông tin người đăng nhập
         Bundle bundle = getArguments();
         if (bundle != null) {
             user = (User) bundle.getSerializable("user");
@@ -60,6 +61,8 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
                 imgviewMAvt.setImageResource(R.drawable.user_icon2);
             }
         }
+
+
         RelativeLayout topRelativeLayout = view.findViewById(R.id.topRelativeLayout);
         topRelativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,27 +165,10 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
-//                        for (int i = 0; i < postList.size(); i++) {
-//                            Post post = postList.get(i);
-//                            if (post.getPostId() == postId) {
-//                                post.setIsLiked(post.getIsLiked() == 1 ? 0 : 1);
-//                                post.setLikeCount(post.getIsLiked() == 1 ? post.getLikeCount() + 1 : post.getLikeCount() - 1);
-//                                if(post.getIsLiked()==1){
-//                                    post.setIsLiked(0);
-//                                    post.setLikeCount(post.getLikeCount()-1);
-//                                }else {
-//                                    post.setIsLiked(1);
-//                                    post.setLikeCount(post.getLikeCount()+1);
-//                                }
-//                                adapter.notifyItemChanged(i);
-//                                retrievePostsFromServer();
-//                                break;
-//                            }
-//                        }
 
-                        // Notify the adapter of the data set change
+
                         retrievePostsFromServer();
-
+                        // Notify the adapter of the data set change
                         adapter.notifyDataSetChanged();
                     } else {
                         // Xử lý lỗi
@@ -215,6 +201,8 @@ public class Menu2Fragment extends Fragment implements adapterPostMenu2.OnPostCl
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
+
+
     private void performDeletePost(int postId, int position) {
         Call<Void> call = apiService.deletePost(postId);
         call.enqueue(new Callback<Void>() {

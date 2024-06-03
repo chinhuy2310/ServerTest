@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+        //nhận thông tin người đăng nhập từ loginActivity
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("user")) {
             loggedInUser = (User) intent.getSerializableExtra("user");
@@ -46,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
         ViewPagerAdapter adapter = new ViewPagerAdapter(this);
 
         // Khởi tạo các Fragment và thêm vào Adapter
-
-
 
         if (loggedInUser != null) {
             Bundle bundle = new Bundle();
@@ -117,16 +116,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
+    //chuyển đến menu3fragment
     public void switchToMenu3Fragment(int groupId) {
         ViewPagerAdapter adapter = (ViewPagerAdapter) viewPager.getAdapter();
         Menu3Fragment menu3Fragment = (Menu3Fragment) adapter.createFragment(2);
 
         // Perform the Fragment transition
         if (menu3Fragment != null) {
-            // Perform any necessary processing before transitioning Fragment (if needed)
+            // thực hiện tìm kiếm các nội dung của category
             menu3Fragment.fetchDataFromApi(groupId,"");
-
             // Move to Menu3Fragment
             viewPager.setCurrentItem(2, true);
         }

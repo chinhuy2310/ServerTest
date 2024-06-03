@@ -6,6 +6,7 @@ public class Comment implements Serializable {
     private String avatar_image;
     private String username;
     private String comment_content;
+    private String created_at;
     private int comment_id ;
     private int user_id;
     private int post_id;
@@ -27,13 +28,11 @@ public class Comment implements Serializable {
         return avatar_image;
     }
 
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatar_image = avatarUrl;
-    }
-
     public String getContent() {
         return comment_content;
     }
+
+    public String getTime(){return created_at;}
 
     public int getComment_id(){return comment_id;}
     public int getUser_id(){return user_id;}

@@ -65,22 +65,22 @@ public class PostDetail extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.post_detail);
 
-
+        // nhận thông tin người đăng nhập
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("user")) {
             user = (User) intent.getSerializableExtra("user");
-//            if (user != null) {
-//                Log.e("userid dang nhap", "tại trang nội dung: " + user.getUserId());
-//            } else {
-//                Log.e("PostDetail", "User is null");
-//            }
+
         } else {
             // Xử lý trường hợp Intent không chứa "user"
-            Log.e("PostDetail", "Intent does not contain 'user' extra");
+//            Log.e("PostDetail", "Intent does not contain 'user' extra");
         }
+
+        // nhận thông tin bài viết từ menu1fragment hoặc menu2fragment
         post = (Post) getIntent().getSerializableExtra("POST_DETAIL");
         postId = intent.getIntExtra("POST_ID", -1);
         int userId = user.getUserId();
+
+
         // Ánh xạ các thành phần UI từ layout
         imageViewAvatar = findViewById(R.id.imageViewAvatar);
         textViewUsername = findViewById(R.id.textViewUsername);
@@ -97,7 +97,8 @@ public class PostDetail extends AppCompatActivity {
         likeCountTextView = findViewById(R.id.likeCountTextView);
         commentCountTextView = findViewById(R.id.commentCountTextView);
 
-        postOptions = findViewById(R.id.postoptions);
+        postOptions = findViewById(R.id.options);
+        // xử lý sự kiếnj khi nhấn vào options menu
         postOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -112,6 +113,7 @@ public class PostDetail extends AppCompatActivity {
                                 Toast.makeText(PostDetail.this, "Reported", Toast.LENGTH_SHORT).show();
                                 return true;
                             case R.id.menu_delete:
+                                // khi nhấn xóa
                                 deletePostConfirmation();
                                 return true;
                             default:
@@ -135,6 +137,8 @@ public class PostDetail extends AppCompatActivity {
                 likePost(userId,postId);
             }
         });
+
+        // sự kiện nhấn nút comment
         buttonComment = findViewById(R.id.buttonComment);
         buttonComment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,12 +198,10 @@ public class PostDetail extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_back); // Đặt icon back tại đây
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_back);
         }
 
-        // Lấy dữ liệu bài đăng từ Intent
 
-//        Log.e("postid:  ", String.valueOf(postId));
         // Kiểm tra xem post có null hay không trước khi hiển thị
         if (post != null) {
             // Hiển thị dữ liệu của bài đăng trên layout
@@ -208,6 +210,7 @@ public class PostDetail extends AppCompatActivity {
         } else {
             // Xử lý trường hợp post là null
         }
+
         apiService = RetrofitClientInstance.getRetrofitInstance().create(APIService.class);
         Call<List<Comment>> call = apiService.getComments(postId);
         call.enqueue(new Callback<List<Comment>>() {
@@ -247,6 +250,7 @@ public class PostDetail extends AppCompatActivity {
                             writecomment.clearFocus();
                             getComments();
                             getPost();
+                            scrollToComments();
                         } else {
                             // Xử lý response khi có lỗi xảy ra
                         }
@@ -257,7 +261,6 @@ public class PostDetail extends AppCompatActivity {
                         // Xử lý khi có lỗi xảy ra trong quá trình gửi request
                     }
                 });
-                // Thêm comment vào cơ sở dữ liệu
             } else {
                 Toast.makeText(this, "Please enter a comment", Toast.LENGTH_SHORT).show();
             }
@@ -278,7 +281,6 @@ public class PostDetail extends AppCompatActivity {
 
                         getPost();
 
-//                        Log.e("like","ok");
                     } else {
                         // Xử lý lỗi
                         Log.e("like","response : " + response.message());
@@ -344,6 +346,7 @@ public class PostDetail extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     // Xóa comment thành công, cập nhật danh sách comment
                     getComments();
+                    getPost();
                     Toast.makeText(PostDetail.this, "Comment deleted", Toast.LENGTH_SHORT).show();
                 } else {
                     // Xử lý khi có lỗi xảy ra
@@ -435,8 +438,6 @@ public class PostDetail extends AppCompatActivity {
         // Hiển thị danh sách các comment trong RecyclerView
         if (comments != null && !comments.isEmpty()) {
             recyclerViewComments.setVisibility(View.VISIBLE);
-//            recyclerViewComments.setLayoutManager(new LinearLayoutManager(this));
-//            recyclerViewComments.setAdapter(new CommentAdapter(this, comments));
             CommentAdapter adapter = new CommentAdapter(this, comments,post);
             adapter.setUser(user);
             recyclerViewComments.setAdapter(adapter);
@@ -451,6 +452,8 @@ public class PostDetail extends AppCompatActivity {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
+
+    // khi nhấn nút back
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

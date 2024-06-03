@@ -100,7 +100,7 @@ public class Menu3Fragment extends Fragment {
                     if (childView == v) {
                         // TextView được chọn
                         childView.setSelected(true);
-                        Log.e("groupid", String.valueOf(groupId));
+//                        Log.e("groupid", String.valueOf(groupId));
                     } else {
                         // TextView khác
                         childView.setSelected(false);
@@ -122,6 +122,9 @@ public class Menu3Fragment extends Fragment {
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Toast.makeText(getActivity(), "The function has not been updated yet", Toast.LENGTH_SHORT).show();
+
 //                // Mở dialog khi nút filter được nhấn
 //                FilterDialogFragment dialogFragment = new FilterDialogFragment();
 //                dialogFragment.show(getChildFragmentManager(), "FilterDialog");
@@ -181,6 +184,7 @@ public class Menu3Fragment extends Fragment {
 
         return view;
     }
+
     public void search(){
         searchText = searchEditText.getText().toString();
         fetchDataFromApi(groupID, searchText);
@@ -191,14 +195,14 @@ public class Menu3Fragment extends Fragment {
         textView3.setVisibility(View.GONE);
         searchEditText.clearFocus();
     }
+
     private void resetData() {
-        // Xóa nội dung của EditText và reset dữ liệu cần thiết ở đây
+        // Xóa nội dung của EditText và reset dữ liệu
         if (searchEditText != null) {
             searchEditText.setText("");
         }
         filterButton.setVisibility(View.GONE);
         searchButtonL.setVisibility(View.GONE);
-//        retrievePostsByGroupFromDatabase();
         groupID=0;
         LinearLayout linearLayout = getView().findViewById(R.id.filterLayout);
         linearLayout.getChildAt(0).setSelected(true);
@@ -246,7 +250,7 @@ public class Menu3Fragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
-                Log.e("Menu3Fragment", "Failed to fetch data: " + t.getMessage());
+//                Log.e("Menu3Fragment", "Failed to fetch data: " + t.getMessage());
                 Toast.makeText(getActivity(), "Failed to fetch data from API", Toast.LENGTH_SHORT).show();
             }
         });

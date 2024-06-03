@@ -21,22 +21,22 @@
             android:layout_height="match_parent">
 
             <ImageView
-                android:id="@+id/imgNewTruyen"
+                android:id="@+id/imgPost"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_launcher_background" />
+                android:src="@drawable/food_bg" />
 
             <TextView
-                android:id="@+id/textviewTenTruyen"
+                android:id="@+id/postTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_marginLeft="20dp"
                 android:layout_marginBottom="10dp"
-                android:maxLines="2"
+                android:maxLines="1"
                 android:ellipsize="end"
-                android:text="Name"
+                android:text="Title"
                 android:textSize="25sp"
                 android:textColor="@color/white"
                 android:shadowColor="@color/black"

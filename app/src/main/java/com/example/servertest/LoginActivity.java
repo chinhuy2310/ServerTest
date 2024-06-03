@@ -29,8 +29,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.login);
-        editTextUserAccname = findViewById(R.id.taikhoan);
-        editTextPassword = findViewById(R.id.matkhau);
+        editTextUserAccname = findViewById(R.id.editTextAccount);
+        editTextPassword = findViewById(R.id.editTextPasword);
         buttonLogin = findViewById(R.id.loginbutton);
         signUpTextView = findViewById(R.id.signUpTextView);
         findPassword = findViewById(R.id.findPasswordText);
@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
     private void Login() {
         String useraccname = editTextUserAccname.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
-
+        // Kiểm tra đã nhập đầy đủ hay chưa, nếu nhập đủ thì gọi api
         if (!useraccname.isEmpty() && !password.isEmpty()) {
             LoginRequest loginRequest = new LoginRequest(useraccname, password);
             Call<User> call = apiService.login(loginRequest);
@@ -86,21 +86,23 @@ public class LoginActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         getUserInfo(useraccname);
                     } else {
-                        Log.e("LoginActivity", "Response code: " + response.code());
+                        // xử lí lỗi
+//                        Log.e("LoginActivity", "Response code: " + response.code());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<User> call, Throwable t) {
                     Toast.makeText(LoginActivity.this, "Login failed: Cannot connect to server" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e("err","Login failed: Cannot connect to server" + t.getMessage());
+//                    Log.e("err","Login failed: Cannot connect to server" + t.getMessage());
                 }
             });
         } else {
+            // nếu chưa nhập account hoặc password thì hiện thông báo
             Toast.makeText(LoginActivity.this, "Please enter username and password", Toast.LENGTH_SHORT).show();
         }
     }
-
+    // Lấy thông tin của người đăng nhập
     private void getUserInfo(String useraccname) {
         Call<UserResponse> call = apiService.getUser(useraccname);
         call.enqueue(new Callback<UserResponse>() {
@@ -110,16 +112,17 @@ public class LoginActivity extends AppCompatActivity {
                     UserResponse userResponse = response.body();
                     if (userResponse != null && userResponse.getUser() != null) {
                         User user = userResponse.getUser();
-                        Log.e("LoginActivity", "User: " + user.toString());
+//                        Log.e("LoginActivity", "User: " + user.toString());
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        // chuyển thông tin của người đăng nhập đến mainactivity để thưc hiện các hành động khác
                         intent.putExtra("user", user);
                         startActivity(intent);
                     } else {
-                        Log.e("LoginActivity", "User object is null");
+//                        Log.e("LoginActivity", "User object is null");
                     }
                 } else {
                     // Xử lý lỗi
-                    Log.e("Getuser", "Response code: " + response.code());
+//                    Log.e("Getuser", "Response code: " + response.code());
                 }
             }
 
@@ -127,7 +130,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(Call<UserResponse> call, Throwable t) {
                 // Xử lý lỗi kết nối
                 Toast.makeText(LoginActivity.this, "Login failed: Cannot connect to server" + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("err", "getuser: Cannot connect to server" + t.getMessage());
+//                Log.e("err", "getuser: Cannot connect to server" + t.getMessage());
             }
         });
     }

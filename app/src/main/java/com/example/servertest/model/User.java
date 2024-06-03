@@ -42,10 +42,6 @@ public class User implements Serializable {
         return username;
     }
 
-    public String getUseraccname() {
-        return useraccname;
-    }
-
     public String getEmail() {
         return email;
     }

@@ -29,14 +29,14 @@
         android:orientation="vertical">
         <EditText
             android:id="@+id/createUsername"
-            android:hint="  nickname"
+            android:hint="  name"
             android:singleLine="true"
             android:layout_marginVertical="7dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"></EditText>
         <EditText
             android:id="@+id/createAccname"
-            android:hint="  account id"
+            android:hint="  account"
             android:singleLine="true"
             android:layout_width="match_parent"
             android:layout_height="50dp"></EditText>

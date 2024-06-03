@@ -1,10 +1,10 @@
 package com.example.servertest.model;
 // Tạo lớp ItemData.java
-public class ItemData {
+public class Category {
     private int imageResId;
     private String itemgridName;
     private int groupId;
-    public ItemData(int imageResId, String itemgridName,int gruopId) {
+    public Category(int imageResId, String itemgridName, int gruopId) {
         this.imageResId = imageResId;
         this.itemgridName = itemgridName;
         this.groupId = gruopId;

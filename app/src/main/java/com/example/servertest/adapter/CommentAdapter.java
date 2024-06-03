@@ -44,11 +44,27 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         return new CommentViewHolder(view);
     }
 
+
+    public class CommentViewHolder extends RecyclerView.ViewHolder {
+        ImageView imageViewCommenterAvatar,postOptions;
+        TextView textViewUsername, textViewContent , textViewTime;
+
+        public CommentViewHolder(@NonNull View itemView) {
+            super(itemView);
+            imageViewCommenterAvatar = itemView.findViewById(R.id.imageViewCommentAvatar);
+            textViewUsername = itemView.findViewById(R.id.textViewUsername);
+            textViewContent = itemView.findViewById(R.id.commentContent);
+            textViewTime = itemView.findViewById(R.id.commentTime);
+            postOptions = itemView.findViewById(R.id.options);
+        }
+    }
+
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, @SuppressLint("RecyclerView") int position) {
         Comment comment = commentList.get(position);
         holder.textViewUsername.setText(comment.getUsername());
         holder.textViewContent.setText(comment.getContent());
+        holder.textViewTime.setText(comment.getTime());
         // Set ảnh đại diện của người bình luận
         if (!comment.getAvatarUrl().isEmpty()){
             Picasso.get().load(comment.getAvatarUrl())
@@ -72,24 +88,22 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                         switch (item.getItemId()) {
                             case R.id.menu_report:
                                 // Xử lý khi chọn Report
-
                                 Toast.makeText(context, "Reported", Toast.LENGTH_SHORT).show();
                                 return true;
                             case R.id.menu_delete:
+                                // Chỉ người commmet hoặc chủ bài viết mới có thể xóa comment trong bài viết
                             if(comment.getUser_id()== user.getUserId()||comment.getPost_id()==post.getPostId()
                                                                         && post.getId()==user.getUserId()){
 
                                 // Lấy ID của comment được chọn
                                 int commentId = commentList.get(position).getComment_id();
+
                                 // Gọi phương thức để xóa comment từ activity
-//                                Log.e("comment_id:",String.valueOf(commentId)+"userid : "+user.getUserId()+"postid : "+post.getPostId());
                                 ((PostDetail) context).deleteCommentConfirmation(commentId);
                             }else{
                                 Toast.makeText(context, "You do not have permission to delete this comment", Toast.LENGTH_SHORT).show();
-
                             }
                                 return true;
-
                             default:
                                 return false;
                         }
@@ -107,16 +121,5 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         return commentList.size();
     }
 
-    public class CommentViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageViewCommenterAvatar,postOptions;
-        TextView textViewUsername, textViewContent;
 
-        public CommentViewHolder(@NonNull View itemView) {
-            super(itemView);
-            imageViewCommenterAvatar = itemView.findViewById(R.id.imageViewCommentAvatar);
-            textViewUsername = itemView.findViewById(R.id.textViewUsername);
-            textViewContent = itemView.findViewById(R.id.textViewComments);
-            postOptions = itemView.findViewById(R.id.postoptions);
-        }
-    }
 }

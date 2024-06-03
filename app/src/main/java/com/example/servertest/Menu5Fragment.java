@@ -47,7 +47,7 @@ public class Menu5Fragment extends Fragment {
                 } else {
                     // Nếu không có đường dẫn ảnh hoặc đường dẫn rỗng, hiển thị ảnh mặc định từ thư mục drawable
                     imgviewMyAvt.setImageResource(R.drawable.user_icon2);
-                    imgviewCover.setImageResource(R.drawable.ic_bg);
+                    imgviewCover.setImageResource(R.drawable.food_bg);
                 }
 //                Log.e("Menu5Fragment", "Username: " + user.getUsername());
 //                Log.e("Menu5Fragment", "Email: " + user.getEmail());
