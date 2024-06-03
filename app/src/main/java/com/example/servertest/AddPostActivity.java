@@ -198,6 +198,13 @@ public class AddPostActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void updateImageUris(List<String> updatedImageUrls) {
+        imageUris.clear();
+        for (String url : updatedImageUrls) {
+            imageUris.add(Uri.parse(url));
+        }
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -220,20 +227,24 @@ public class AddPostActivity extends AppCompatActivity {
             }
         }
     }
+
     private void displaySelectedImages(List<Uri> imageUris) {
         List<String> imagePaths = new ArrayList<>();
         for (Uri uri : imageUris) {
-            // Lấy đường dẫn của ảnh và thêm vào danh sách
             String imagePath = uri.toString();
             imagePaths.add(imagePath);
         }
         if (!imagePaths.isEmpty()) {
-            // Tạo adapter và thiết lập cho RecyclerView
             SelectedImageAdapter adapter1 = new SelectedImageAdapter(this, imagePaths);
             adapter1.setOnListEmptyListener(new SelectedImageAdapter.OnListEmptyListener() {
                 @Override
                 public void onListEmpty() {
                     imageViewSelected.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onListUpdated(List<String> updatedImageUrls) {
+                    updateImageUris(updatedImageUrls);
                 }
             });
             imageViewSelected.setAdapter(adapter1);

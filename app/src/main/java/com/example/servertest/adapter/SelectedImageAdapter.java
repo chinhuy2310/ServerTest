@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.servertest.R;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SelectedImageAdapter extends RecyclerView.Adapter<SelectedImageAdapter.ViewHolder> {
@@ -23,10 +24,9 @@ public class SelectedImageAdapter extends RecyclerView.Adapter<SelectedImageAdap
     }
     private OnListEmptyListener mListener;
 
-
-
     public interface OnListEmptyListener {
         void onListEmpty();
+        void onListUpdated(List<String> updatedImageUrls);
     }
 
     public void setOnListEmptyListener(OnListEmptyListener listener) {
@@ -55,6 +55,11 @@ public class SelectedImageAdapter extends RecyclerView.Adapter<SelectedImageAdap
                 if (imageUrls.isEmpty() && mListener != null) {
                     mListener.onListEmpty();
                 }
+
+                // Notify the listener about the updated list
+                if (mListener != null) {
+                    mListener.onListUpdated(getImageUrls());
+                }
             }
         });
     }
@@ -63,11 +68,13 @@ public class SelectedImageAdapter extends RecyclerView.Adapter<SelectedImageAdap
     public int getItemCount() {
         return imageUrls.size();
     }
+
     public List<String> getImageUrls() {
-        return imageUrls;
+        return new ArrayList<>(imageUrls);
     }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageViewItem,buttonRemove;
+        ImageView imageViewItem, buttonRemove;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -75,5 +82,4 @@ public class SelectedImageAdapter extends RecyclerView.Adapter<SelectedImageAdap
             buttonRemove = itemView.findViewById(R.id.buttonRemove);
         }
     }
-
 }
